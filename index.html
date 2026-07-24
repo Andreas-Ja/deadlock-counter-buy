@@ -61,6 +61,16 @@
   }
   h1 .thin { color: var(--muted); font-weight: 500; }
   .sub { color: var(--muted); font-size: 14px; max-width: 46ch; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin-top: 4px; }
+  .lg { display: inline-flex; align-items: center; gap: 7px; font-size: 12px; color: var(--muted); }
+  .lg-badge {
+    display: grid; place-items: center; width: 20px; height: 20px; border-radius: 6px;
+    background: var(--gold); color: #0d1311; font-weight: 800; font-size: 11px; font-variant-numeric: tabular-nums;
+  }
+  .lg-star {
+    font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    color: #0d1311; background: var(--gold); padding: 2px 7px; border-radius: 999px;
+  }
   .theme-toggle {
     background: var(--raised); color: var(--muted); border: 1px solid var(--line);
     border-radius: 999px; padding: 8px 14px; font-size: 12px; cursor: pointer;
@@ -147,6 +157,15 @@
     padding: 13px 14px; margin-bottom: 10px; overflow: hidden;
   }
   .item.top { border-color: var(--gold-dim); background: color-mix(in srgb, var(--gold) 7%, var(--raised)); }
+  .item.has-must { border-left: 3px solid var(--gold); }
+  .must-tag {
+    display: inline-flex; align-items: center; gap: 3px; vertical-align: middle;
+    margin-left: 8px; font-size: 10px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase;
+    color: #0d1311; background: var(--gold); padding: 2px 7px; border-radius: 999px; white-space: nowrap;
+  }
+  .chip.must { border-color: var(--gold); color: var(--text); background: color-mix(in srgb, var(--gold) 20%, var(--raised-2)); }
+  .reasons li.must .who { color: var(--gold); }
+  .reasons .mb { color: var(--gold); font-weight: 800; }
   .item-head { display: flex; align-items: center; gap: 12px; }
   .badge {
     flex: none; width: 46px; height: 46px; border-radius: 10px; display: grid; place-items: center;
@@ -196,6 +215,10 @@
       <span class="eyebrow">Deadlock · Counter-Buy Helper</span>
       <h1>Pick the enemy line-up. <span class="thin">Buy what overlaps.</span></h1>
       <p class="sub">Select the enemy heroes and this ranks the defensive items by how many of them each one shuts down — so you spend souls on the items that cover the most threats at once.</p>
+      <div class="legend">
+        <span class="lg"><span class="lg-badge">3</span> counters this many of your enemies</span>
+        <span class="lg"><span class="lg-star">★ Must-buy</span> near-mandatory vs that hero</span>
+      </div>
     </div>
     <button class="theme-toggle" id="themeBtn" type="button">◐ Theme</button>
   </header>
@@ -578,6 +601,16 @@ const IMG = {
 };
 const imgUrl = n => `img/${IMG[n]}.webp`;
 
+/* MUST-BUY picks (bolded in the notes) — the item that's near-mandatory vs this hero. */
+const MUST = {
+  "Apollo":["Slowing Hex"], "Calico":["Slowing Hex"], "Drifter":["Disarming Hex"],
+  "Holliday":["Indomitable"], "Infernus":["Dispel Magic"], "Lady Geist":["Decay"],
+  "Lash":["Ethereal Shift"], "Mirage":["Dispel Magic"], "Paige":["Dispel Magic"],
+  "Seven":["Dispel Magic"], "Silver":["Metal Skin"], "Venator":["Metal Skin"],
+  "Vindicta":["Knockdown"], "Viscous":["Curse"], "Vyper":["Return Fire"], "Warden":["Dispel Magic"]
+};
+const isMust = (hero,item) => (MUST[hero]||[]).includes(item);
+
 /* Short general blurbs for items (shown under the item name). */
 const BLURBS = {
   "Dispel Magic":"Removes debuffs — the most general defensive item.",
@@ -678,7 +711,7 @@ function render(){
   selected.forEach(hero=>{
     (DATA[hero].items||[]).forEach(([item,why])=>{
       if(!map.has(item)) map.set(item,[]);
-      map.get(item).push({hero,why});
+      map.get(item).push({hero,why,must:isMust(hero,item)});
     });
     (DATA[hero].avoid||[]).forEach(([item,why])=>{
       if(!avoids.has(item)) avoids.set(item,[]);
@@ -686,23 +719,28 @@ function render(){
     });
   });
 
-  const items=[...map.entries()].map(([item,list])=>({item,list,count:list.length}));
-  items.sort((a,b)=> b.count-a.count || a.item.localeCompare(b.item));
-  const maxCount=items[0].count;
+  const items=[...map.entries()].map(([item,list])=>{
+    const mustCount=list.filter(r=>r.must).length;
+    // must-buys sort before pure overlap: each must-buy is worth ~one extra threat covered
+    return {item,list,count:list.length,mustCount,score:list.length+mustCount};
+  });
+  items.sort((a,b)=> b.score-a.score || b.mustCount-a.mustCount || b.count-a.count || a.item.localeCompare(b.item));
+  const maxScore=items[0].score;
 
   resInfo.innerHTML=`vs <b style="color:var(--gold);font-variant-numeric:tabular-nums">${n}</b> ${n===1?'enemy':'enemies'}`;
 
   let html='';
-  const overlapItems=items.filter(x=>x.count>=2);
-  const single=items.filter(x=>x.count<2);
+  // "priority" = a must-buy vs anyone, or covers 2+ threats. everything else is situational.
+  const priority=items.filter(x=>x.mustCount>0 || x.count>=2);
+  const single=items.filter(x=>!(x.mustCount>0 || x.count>=2));
 
-  if(overlapItems.length){
-    html+=`<div class="section-label">Best overlap — covers multiple threats</div>`;
-    html+=overlapItems.map(x=>itemCard(x,n,maxCount)).join('');
+  if(priority.length){
+    html+=`<div class="section-label">Priority buys — must-buys &amp; multi-threat overlap</div>`;
+    html+=priority.map(x=>itemCard(x,n,maxScore)).join('');
   }
   if(single.length){
-    html+=`<div class="section-label" style="margin-top:18px">Single-target answers</div>`;
-    html+=single.map(x=>itemCard(x,n,maxCount)).join('');
+    html+=`<div class="section-label" style="margin-top:18px">Situational — single-target answers</div>`;
+    html+=single.map(x=>itemCard(x,n,maxScore)).join('');
   }
 
   if(avoids.size){
@@ -716,15 +754,18 @@ function render(){
   res.innerHTML=html;
 }
 
-function itemCard(x,n,maxCount){
-  const isTop = x.count===maxCount && x.count>=2;
+function itemCard(x,n,maxScore){
+  const isTop = x.score===maxScore && x.score>=2;
   const blurb = BLURBS[x.item] ? `<span class="blurb">${BLURBS[x.item]}</span>` : '';
-  const chips = x.list.map(r=>`<span class="chip"><img src="${imgUrl(r.hero)}" alt="" loading="lazy">${r.hero}</span>`).join('');
-  const reasons = x.list.map(r=>`<li><span class="who"><img src="${imgUrl(r.hero)}" alt="" loading="lazy">${r.hero}</span><span class="txt">${r.why}</span></li>`).join('');
-  return `<div class="item${isTop?' top':''}">
+  const mustTag = x.mustCount>0
+    ? `<span class="must-tag" title="Near-mandatory vs ${x.list.filter(r=>r.must).map(r=>r.hero).join(', ')}">★ Must-buy${x.mustCount>1?` ×${x.mustCount}`:''}</span>`
+    : '';
+  const chips = x.list.map(r=>`<span class="chip${r.must?' must':''}"><img src="${imgUrl(r.hero)}" alt="" loading="lazy">${r.hero}${r.must?' ★':''}</span>`).join('');
+  const reasons = x.list.map(r=>`<li class="${r.must?'must':''}"><span class="who"><img src="${imgUrl(r.hero)}" alt="" loading="lazy">${r.hero}</span><span class="txt">${r.must?'<b class="mb">Must-buy — </b>':''}${r.why}</span></li>`).join('');
+  return `<div class="item${isTop?' top':''}${x.mustCount>0?' has-must':''}">
     <div class="item-head">
       <div class="badge"><span class="num">${x.count}</span><span class="of">of ${n}</span></div>
-      <div class="item-name"><span class="n">${x.item}</span>${blurb}</div>
+      <div class="item-name"><span class="n">${x.item}${mustTag}</span>${blurb}</div>
       <div class="covers">${chips}</div>
     </div>
     <ul class="reasons">${reasons}</ul>
