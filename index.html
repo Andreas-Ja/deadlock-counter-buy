@@ -217,7 +217,7 @@
       <p class="sub">Select the enemy heroes and this ranks the defensive items by how many of them each one shuts down — so you spend souls on the items that cover the most threats at once.</p>
       <div class="legend">
         <span class="lg"><span class="lg-badge">3</span> counters this many of your enemies</span>
-        <span class="lg"><span class="lg-star">★ Must-buy</span> near-mandatory vs that hero</span>
+        <span class="lg"><span class="lg-star">★ Hard counter</span> shuts this hero down</span>
       </div>
     </div>
     <button class="theme-toggle" id="themeBtn" type="button">◐ Theme</button>
@@ -735,7 +735,7 @@ function render(){
   const single=items.filter(x=>!(x.mustCount>0 || x.count>=2));
 
   if(priority.length){
-    html+=`<div class="section-label">Priority buys — must-buys &amp; multi-threat overlap</div>`;
+    html+=`<div class="section-label">Priority buys — hard counters &amp; multi-threat overlap</div>`;
     html+=priority.map(x=>itemCard(x,n,maxScore)).join('');
   }
   if(single.length){
@@ -758,10 +758,10 @@ function itemCard(x,n,maxScore){
   const isTop = x.score===maxScore && x.score>=2;
   const blurb = BLURBS[x.item] ? `<span class="blurb">${BLURBS[x.item]}</span>` : '';
   const mustTag = x.mustCount>0
-    ? `<span class="must-tag" title="Near-mandatory vs ${x.list.filter(r=>r.must).map(r=>r.hero).join(', ')}">★ Must-buy${x.mustCount>1?` ×${x.mustCount}`:''}</span>`
+    ? `<span class="must-tag" title="Hard counter vs ${x.list.filter(r=>r.must).map(r=>r.hero).join(', ')}">★ Hard counter${x.mustCount>1?` ×${x.mustCount}`:''}</span>`
     : '';
   const chips = x.list.map(r=>`<span class="chip${r.must?' must':''}"><img src="${imgUrl(r.hero)}" alt="" loading="lazy">${r.hero}${r.must?' ★':''}</span>`).join('');
-  const reasons = x.list.map(r=>`<li class="${r.must?'must':''}"><span class="who"><img src="${imgUrl(r.hero)}" alt="" loading="lazy">${r.hero}</span><span class="txt">${r.must?'<b class="mb">Must-buy — </b>':''}${r.why}</span></li>`).join('');
+  const reasons = x.list.map(r=>`<li class="${r.must?'must':''}"><span class="who"><img src="${imgUrl(r.hero)}" alt="" loading="lazy">${r.hero}</span><span class="txt">${r.must?'<b class="mb">Hard counter — </b>':''}${r.why}</span></li>`).join('');
   return `<div class="item${isTop?' top':''}${x.mustCount>0?' has-must':''}">
     <div class="item-head">
       <div class="badge"><span class="num">${x.count}</span><span class="of">of ${n}</span></div>
