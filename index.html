@@ -1,0 +1,722 @@
+<title>Deadlock Counter-Buy Helper</title>
+<style>
+  :root {
+    --ground: #0d1311;
+    --panel: #141e1a;
+    --raised: #1b2621;
+    --raised-2: #23302a;
+    --line: #2c3a33;
+    --gold: #e3a552;
+    --gold-dim: #b47f3c;
+    --teal: #4bb6a3;
+    --red: #d1604f;
+    --red-dim: #7a3a31;
+    --text: #ece7db;
+    --muted: #92a099;
+    --muted-2: #6d7c75;
+    --shadow: 0 6px 24px rgba(0,0,0,.45);
+  }
+  :root[data-theme="light"] {
+    --ground: #ece7dc;
+    --panel: #f5f1e8;
+    --raised: #fbf8f0;
+    --raised-2: #f0ebde;
+    --line: #d9d1bf;
+    --gold: #a6702a;
+    --gold-dim: #8a5c22;
+    --teal: #1f8577;
+    --red: #b23f2e;
+    --red-dim: #e0b3aa;
+    --text: #241f18;
+    --muted: #6a6355;
+    --muted-2: #8a8375;
+    --shadow: 0 6px 20px rgba(60,50,30,.14);
+  }
+
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(227,165,82,.07), transparent 60%),
+      radial-gradient(900px 500px at -10% 10%, rgba(75,182,163,.06), transparent 55%),
+      var(--ground);
+    color: var(--text);
+    font-family: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.5;
+    min-height: 100vh;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 80px; }
+
+  /* Header */
+  header { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 24px; justify-content: space-between; margin-bottom: 8px; }
+  .brand { display: flex; flex-direction: column; gap: 6px; }
+  .eyebrow {
+    font-size: 11px; letter-spacing: .28em; text-transform: uppercase;
+    color: var(--gold); font-weight: 700;
+  }
+  h1 {
+    margin: 0; font-weight: 800; letter-spacing: -.01em;
+    font-size: clamp(26px, 4.4vw, 40px); line-height: 1.02; text-wrap: balance;
+  }
+  h1 .thin { color: var(--muted); font-weight: 500; }
+  .sub { color: var(--muted); font-size: 14px; max-width: 46ch; }
+  .theme-toggle {
+    background: var(--raised); color: var(--muted); border: 1px solid var(--line);
+    border-radius: 999px; padding: 8px 14px; font-size: 12px; cursor: pointer;
+    font-weight: 600; letter-spacing: .04em; transition: color .15s, border-color .15s;
+  }
+  .theme-toggle:hover { color: var(--text); border-color: var(--gold-dim); }
+
+  /* Layout */
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 22px; margin-top: 24px; }
+  @media (max-width: 860px) { .cols { grid-template-columns: 1fr; } }
+
+  .card {
+    background: var(--panel); border: 1px solid var(--line);
+    border-radius: 14px; box-shadow: var(--shadow);
+  }
+  .card-head {
+    display: flex; align-items: center; justify-content: space-between; gap: 12px;
+    padding: 16px 18px; border-bottom: 1px solid var(--line);
+  }
+  .card-title { font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: var(--muted); font-weight: 700; }
+  .card-body { padding: 16px 18px; }
+
+  /* Picker */
+  .picker { position: sticky; top: 16px; }
+  @media (max-width: 860px) { .picker { position: static; } }
+  .search {
+    width: 100%; background: var(--raised); border: 1px solid var(--line); color: var(--text);
+    border-radius: 9px; padding: 10px 12px; font-size: 14px; margin-bottom: 14px; font-family: inherit;
+  }
+  .search::placeholder { color: var(--muted-2); }
+  .search:focus { outline: 2px solid var(--gold-dim); outline-offset: 1px; border-color: transparent; }
+
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+  .hero {
+    position: relative; display: flex; flex-direction: column; align-items: center; gap: 7px;
+    background: var(--raised); border: 1px solid var(--line); border-radius: 10px;
+    padding: 11px 6px 9px; cursor: pointer; text-align: center;
+    transition: transform .12s ease, border-color .12s, background .12s;
+    color: var(--text); font: inherit;
+  }
+  .hero:hover { transform: translateY(-2px); border-color: var(--gold-dim); }
+  .hero:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .mono {
+    width: 40px; height: 40px; border-radius: 9px; display: grid; place-items: center;
+    font-weight: 800; font-size: 15px; letter-spacing: .02em; color: #0d1311;
+    box-shadow: inset 0 -2px 6px rgba(0,0,0,.25);
+  }
+  .hero .name { font-size: 11.5px; font-weight: 600; letter-spacing: .01em; line-height: 1.15; color: var(--muted); }
+  .hero[aria-pressed="true"] {
+    border-color: var(--gold); background: color-mix(in srgb, var(--gold) 14%, var(--raised));
+  }
+  .hero[aria-pressed="true"] .name { color: var(--text); }
+  .hero[aria-pressed="true"]::after {
+    content: "✓"; position: absolute; top: 5px; right: 6px;
+    font-size: 11px; font-weight: 800; color: var(--gold);
+  }
+  .hero.hidden { display: none; }
+
+  .picker-foot { display: flex; align-items: center; justify-content: space-between; margin-top: 14px; gap: 10px; }
+  .count-note { font-size: 12.5px; color: var(--muted); }
+  .count-note b { color: var(--gold); font-variant-numeric: tabular-nums; }
+  .clear {
+    background: none; border: 1px solid var(--line); color: var(--muted);
+    border-radius: 8px; padding: 7px 12px; font-size: 12px; cursor: pointer; font-weight: 600;
+  }
+  .clear:hover { color: var(--red); border-color: var(--red-dim); }
+
+  /* Results */
+  .empty { color: var(--muted); font-size: 14px; padding: 28px 6px; text-align: center; }
+  .empty .big { font-size: 15px; color: var(--text); font-weight: 600; margin-bottom: 6px; }
+
+  .section-label {
+    font-size: 11px; letter-spacing: .18em; text-transform: uppercase; font-weight: 700;
+    color: var(--muted-2); margin: 4px 2px 10px;
+  }
+
+  .item {
+    background: var(--raised); border: 1px solid var(--line); border-radius: 12px;
+    padding: 13px 14px; margin-bottom: 10px; overflow: hidden;
+  }
+  .item.top { border-color: var(--gold-dim); background: color-mix(in srgb, var(--gold) 7%, var(--raised)); }
+  .item-head { display: flex; align-items: center; gap: 12px; }
+  .badge {
+    flex: none; width: 46px; height: 46px; border-radius: 10px; display: grid; place-items: center;
+    background: var(--raised-2); border: 1px solid var(--line); line-height: 1;
+  }
+  .item.top .badge { background: var(--gold); border-color: var(--gold); }
+  .badge .num { font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; color: var(--text); }
+  .item.top .badge .num { color: #0d1311; }
+  .badge .of { font-size: 9px; letter-spacing: .08em; color: var(--muted-2); font-weight: 700; margin-top: 1px; }
+  .item.top .badge .of { color: rgba(13,19,17,.7); }
+  .item-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .item-name .n { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
+  .item-name .blurb { font-size: 12px; color: var(--muted); }
+  .covers { margin-left: auto; display: flex; flex-wrap: wrap; gap: 5px; justify-content: flex-end; max-width: 45%; }
+  @media (max-width: 520px) { .covers { display: none; } }
+  .chip {
+    font-size: 10.5px; font-weight: 700; letter-spacing: .02em; padding: 3px 8px;
+    border-radius: 999px; background: var(--raised-2); color: var(--muted); border: 1px solid var(--line);
+  }
+  .item.top .chip { color: var(--text); }
+
+  .reasons { list-style: none; margin: 11px 0 0; padding: 11px 0 0; border-top: 1px dashed var(--line); display: grid; gap: 7px; }
+  .reasons li { display: grid; grid-template-columns: minmax(88px, auto) 1fr; gap: 10px; font-size: 13px; }
+  .reasons .who { color: var(--gold); font-weight: 700; }
+  .reasons .txt { color: var(--muted); }
+
+  /* Avoid section */
+  .avoid-item {
+    display: grid; grid-template-columns: minmax(96px, auto) 1fr; gap: 12px;
+    background: color-mix(in srgb, var(--red) 8%, var(--raised));
+    border: 1px solid var(--red-dim); border-radius: 10px; padding: 11px 13px; margin-bottom: 9px;
+  }
+  .avoid-item .aname { font-weight: 700; color: var(--red); font-size: 14px; }
+  .avoid-item .why { font-size: 12.5px; color: var(--muted); }
+  .avoid-item .why b { color: var(--text); font-weight: 600; }
+
+  footer { margin-top: 32px; color: var(--muted-2); font-size: 12px; text-align: center; line-height: 1.6; }
+  footer a { color: var(--gold-dim); }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <span class="eyebrow">Deadlock · Counter-Buy Helper</span>
+      <h1>Pick the enemy line-up. <span class="thin">Buy what overlaps.</span></h1>
+      <p class="sub">Select the enemy heroes and this ranks the defensive items by how many of them each one shuts down — so you spend souls on the items that cover the most threats at once.</p>
+    </div>
+    <button class="theme-toggle" id="themeBtn" type="button">◐ Theme</button>
+  </header>
+
+  <div class="cols">
+    <!-- Picker -->
+    <section class="card picker" aria-label="Enemy hero selection">
+      <div class="card-head">
+        <span class="card-title">Enemy team</span>
+        <span class="count-note" id="selInfo"><b id="selCount">0</b> selected</span>
+      </div>
+      <div class="card-body">
+        <input class="search" id="search" type="text" placeholder="Filter heroes…" autocomplete="off" spellcheck="false" aria-label="Filter heroes">
+        <div class="grid" id="heroGrid"></div>
+        <div class="picker-foot">
+          <span class="count-note">Tip: 6 heroes = full enemy team.</span>
+          <button class="clear" id="clearBtn" type="button">Clear all</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Results -->
+    <section class="card" aria-label="Recommended counter items" aria-live="polite">
+      <div class="card-head">
+        <span class="card-title">Recommended buys</span>
+        <span class="count-note" id="resInfo"></span>
+      </div>
+      <div class="card-body" id="results">
+        <div class="empty">
+          <div class="big">No enemies selected yet.</div>
+          Tap heroes on the left to build the enemy team and see what to buy.
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <footer>
+    Item advice compiled from a community counter-buying guide. Situational — adapt to your role and build.<br>
+    Not affiliated with Valve. Deadlock is a trademark of Valve Corporation.
+  </footer>
+</div>
+
+<script>
+/* ---- Data: hero -> counter items (with reasons) + items to avoid ---- */
+const DATA = {
+  "Abrams": {
+    items: [
+      ["Rebuttal","Melee resist vs his melee-focused build"],
+      ["Juggernaut","Melee resist that slots in easily"],
+      ["Decay","Anti-heal + %-max/current HP damage"],
+      ["Toxic Bullets","Anti-heal + %-HP damage"],
+      ["Warp Stone","Dodge the charge and the slam"]
+    ],
+    avoid: [["Indomitable","His charge is two stun instances — burns Indom and still stuns you"]]
+  },
+  "Apollo": {
+    items: [
+      ["Slowing Hex","Shuts off 3 of his 4 abilities"],
+      ["Silence Wave","Counters his kit; use if he runs Debuff Remover"],
+      ["Counter Spell","Can counter his ultimate even after being silenced"],
+      ["Spirit Resist","Blunts his burst spirit damage"],
+      ["Spellbreaker","Shuts down most of his spirit burst"]
+    ]
+  },
+  "Bebop": {
+    items: [
+      ["Indomitable","Completely negates his first hook"],
+      ["Unstoppable","Escape after you've been hooked"],
+      ["Warp Stone","Get around a corner and break line of sight after a hook"],
+      ["Counter Spell","Deals with the bomb"],
+      ["Dispel Magic","Removes the bomb"]
+    ]
+  },
+  "Billy": {
+    items: [
+      ["Rebuttal","Strong into his melee pressure"],
+      ["Slowing Hex","Stops him rising-ramming away for free"],
+      ["Counter Spell","Escape his ultimate"],
+      ["Unstoppable","Get out of his ultimate"],
+      ["Ethereal Shift","Get out of his ultimate"],
+      ["Dispel Magic","Dark horse — clears the Wrecked debuff and negates his damage"]
+    ]
+  },
+  "Calico": {
+    items: [
+      ["Slowing Hex","Shuts down all abilities except bomb"],
+      ["Silence Wave","Shuts down all of her abilities"],
+      ["Curse","Catches her when cooldowns are up — she's very mobile"],
+      ["Spirit Resilience","Survive her all-spirit burst combo"]
+    ]
+  },
+  "Celeste": {
+    items: [
+      ["Slowing Hex","Added gravity helps drag her down and chase"],
+      ["Knockdown","Gets her out of the sky and onto the floor"],
+      ["Dispel Magic","Removes the Light Eater sack — nullifies most damage"],
+      ["Disarming Hex","Dark horse — she's a secret gun character; turn the gun off"]
+    ]
+  },
+  "Doorman": {
+    items: [
+      ["Silence Wave","His door isn't a movement ability — you must CC him"],
+      ["Curse","Removes Cheat Death; strong before his ult goes unstoppable"],
+      ["Warp Stone","Escape the setup outside his ultimate"],
+      ["Unstoppable","Stops the time-slow after leaving his ult"],
+      ["Counter Spell","Avoid the initial door hit or the exit setup"]
+    ],
+    avoid: [["Slowing Hex","His door is not a movement ability — Slowing Hex does nothing"]]
+  },
+  "Drifter": {
+    items: [
+      ["Debuff Remover","His kit is all debuffs — pop it on the mark to clear toxic proc too"],
+      ["Counter Spell","His ult is obvious; pre-counter it for free"],
+      ["Disarming Hex","He's a gun character — does nothing without his gun"],
+      ["Divine Barrier","Completely nullifies his ultimate"],
+      ["Metal Skin","Useful if he stacks a lot (won't stop debuffs)"]
+    ]
+  },
+  "Dynamo": {
+    items: [
+      ["Unstoppable","Your only real out of his ultimate — hope you hit it"],
+      ["Rescue Beam","Pull teammates out of his ult"]
+    ],
+    avoid: [["Indomitable","Does not work against his ultimate"]]
+  },
+  "Graves": {
+    items: [
+      ["Ricochet","Procs off skulls and ghouls — clears an entire wave fast"],
+      ["Dispel Magic","Escape the wall / remove the toxic bullets proc"],
+      ["Return Fire","Can destroy the skulls on the same frame they hit you"]
+    ]
+  },
+  "Grey Talon": {
+    items: [
+      ["Rusted Barrel","Surprisingly strong in the early lane vs his gun"],
+      ["Slowing Hex","Shuts down his late-game spirit pivot"],
+      ["Knockdown","Shuts him down once he goes spirit"],
+      ["Spellbreaker","Negates most charge-shot damage (mystic shot removes it though)"]
+    ]
+  },
+  "Haze": {
+    items: [
+      ["Indomitable","Instant pick over Unstoppable — saves you from her unpredictable combo"],
+      ["Plated Armor","Stops her stack buildup — she can't Curse it off"],
+      ["Metal Skin","Avoids damage temporarily (stacks still land — remove with Dispel)"]
+    ]
+  },
+  "Holliday": {
+    items: [
+      ["Counter Spell","Counter the lasso if you hear the wind-up"],
+      ["Unstoppable","Also beats the lasso with good reactions"],
+      ["Indomitable","Basically immune — her lasso just gives you a big shield 1v1"],
+      ["Spirit Resist","Blunts her barrels"],
+      ["Slowing Hex","Shuts down her jump pads"]
+    ]
+  },
+  "Infernus": {
+    items: [
+      ["Dispel Magic","#1 pick — instantly removes his burn proc"],
+      ["Counter Spell","Avoid the range of his ultimate"],
+      ["Warp Stone","Avoid the range of his ultimate"],
+      ["Plated Armor","Stops his 3 building up (prefer vs Haze/Wraith too)"],
+      ["Juggernaut","Stops his 3 building up (prefer vs another M1)"]
+    ]
+  },
+  "Ivy": {
+    items: [
+      ["Dispel Magic","Great vs gun/Capacitor Ivy builds"],
+      ["Metal Skin","Vs gun Ivy — mostly full gun damage"],
+      ["Counter Spell","Counter Stone Form and walk away completely free"],
+      ["Unstoppable","Out of her setup vs spirit builds"]
+    ]
+  },
+  "Kelvin": {
+    items: [
+      ["Slowing Hex","Hex him early, before he uses Path"],
+      ["Knockdown","Knocks him out of the sky through Path"],
+      ["Silence Wave","Well-timed, stops him getting his ult off"],
+      ["Toxic Bullets","Anti-heal for his ult (he's shaped like a fridge)"],
+      ["Healbane","Anti-heal for his ult"],
+      ["Spirit Burn","Anti-heal for his ult"],
+      ["Ethereal Shift","Time out his ult from inside the dome and escape"]
+    ]
+  },
+  "Lady Geist": {
+    items: [
+      ["Decay","She heals a lot — strong when she's low"],
+      ["Silencer","One of the few ways to actually shut her down"],
+      ["Silence Wave","Stop her getting her ult off"],
+      ["Dispel Magic","Remove one of her drains"],
+      ["Counter Spell","Counter her ultimate (for ballers)"],
+      ["Metal Skin","Very late game — she becomes a gun carry"],
+      ["Plated Armor","Very late game — she becomes a gun carry"]
+    ]
+  },
+  "Lash": {
+    items: [
+      ["Ethereal Shift","Strongest item vs Lash — his slam does zero and he's committed"],
+      ["Spirit Resilience","Survive a huge chunk of his spirit damage"],
+      ["Enchanter's Barrier","Stack spirit resist to survive his combo"],
+      ["Indomitable","Avoid his ultimate"],
+      ["Unstoppable","Avoid his ultimate"],
+      ["Counter Spell","Avoid his ultimate"],
+      ["Slowing Hex","Cripples his escape and re-engage"],
+      ["Anvil","Punish him when he goes to look"]
+    ]
+  },
+  "McGinnis": {
+    items: [
+      ["Monster Rounds","Turrets count as NPCs — increases your damage to them"],
+      ["Cultist Sacrifice","Deal with her turret NPCs"],
+      ["Knockdown","Bring two — she buys Indom every game"],
+      ["Stuns","Have hard CC available to break her setup"]
+    ]
+  },
+  "Mina": {
+    items: [
+      ["Slowing Hex","Pop it — but she'll Debuff Remove it, so bring a second"],
+      ["Silence Wave","Shut her down"],
+      ["Curse","Shut her down"]
+    ],
+    avoid: [["Knockdown","Ineffective — she just uses Bats on the timer"]]
+  },
+  "Mirage": {
+    items: [
+      ["Dispel Magic","His kit is debuffs — clears beetle, marks, damage-red and stops his heal"],
+      ["Unstoppable","Great vs the tornado build; also carries debuff reduction"],
+      ["Slowing Hex","Solid — but bring two of them"]
+    ]
+  },
+  "Mo & Krill": {
+    items: [
+      ["Debuff Reducer","Insane vs his ultimate — bare minimum pickup"],
+      ["Toxic Bullets","Anti-heal vs a large-HP target"],
+      ["Decay","Anti-heal vs a large-HP target"],
+      ["Indomitable","Valid way to deal with the combo"],
+      ["Unstoppable","Valid way to deal with the combo"],
+      ["Counter Spell","Can avoid the combo — but it's still difficult (*)"]
+    ]
+  },
+  "Paige": {
+    items: [
+      ["Dispel Magic","Hard-counter — clears her knockdown and her root. That's it, just buy it"],
+      ["Unstoppable","The alternative if you skip Dispel"]
+    ]
+  },
+  "Paradox": {
+    items: [
+      ["Indomitable","Her Carbine doesn't proc it — only the ult does"],
+      ["Dispel Magic","Her amp stacks as a debuff — remove it"]
+    ]
+  },
+  "Pocket": {
+    items: [
+      ["Slowing Hex","One of the few items that shuts him down — stops him taking the cloak"],
+      ["Silence Wave","Stops him entering the briefcase to dodge your Hex"],
+      ["Curse","Stops him entering the briefcase to dodge your Hex"],
+      ["Counter Spell","His ultimate is very telegraphed"],
+      ["Divine Barrier","Negates the ult"]
+    ]
+  },
+  "Rem": {
+    items: [
+      ["Slowing Hex","Stops his 2 — deny the jump to an ally"],
+      ["Counter Spell","His ult is telegraphed — free to counter"],
+      ["Decay","Anti-heal — he's putting up big heal numbers lately"],
+      ["Healbane","Generic anti-heal against his healing"]
+    ]
+  },
+  "Seven": {
+    items: [
+      ["Dispel Magic","Remove his telegraphed point-and-click stun (and toxic proc)"],
+      ["Knockdown","Have an ally hold it for when he's ulting"],
+      ["Unstoppable","Escape the ult — forces him to buy his own Unstop"],
+      ["Disarming Hex","He's a gun carry — turn the gun off"]
+    ]
+  },
+  "Shiv": {
+    items: [
+      ["Dispel Magic","Clears his debuff pile — decay, knives, dash stacks"],
+      ["Spellbreaker","Cuts the chunk and shortens every debuff's duration"],
+      ["Decay","Basic healing reduction is good vs him"],
+      ["Healbane","Basic healing reduction is good vs him"]
+    ]
+  },
+  "Silver": {
+    items: [
+      ["Return Fire","Slamfire makes her take huge damage (human form)"],
+      ["Metal Skin","Survive wolf form — she basically can't kill you through it"],
+      ["Warp Stone","Warp over her dash and she flies past like a matador"],
+      ["Disarming Hex","Ulting Silver can't use her claws"],
+      ["Slowing Hex","Can't dash — makes her easy to avoid"]
+    ]
+  },
+  "Sinclair": {
+    items: [
+      ["Slowing Hex","Stops his back-and-forth teleport"],
+      ["Knockdown","Generically good when he goes to look"],
+      ["Unstoppable","Depends on the ults he grabs — solid answer"],
+      ["Spellbreaker","For his 1,000-damage bolts"]
+    ]
+  },
+  "Ventor": {
+    items: [
+      ["Metal Skin","He's a gun and nothing but a gun — even blocks his entire ult"],
+      ["Disarming Hex","Can't shoot his gun — can't even fire his ult"]
+    ]
+  },
+  "Victor": {
+    items: [
+      ["Decay","Anti-heal — deny the heal thing, it's the only way to kill him"],
+      ["Healbane","Anti-heal against his sustain"],
+      ["Spirit Burn","Anti-heal against his sustain"],
+      ["Slowing Hex","He's slow and lumbering — get out of his healing zone"],
+      ["Curse","Shut down his infuser or catch him right out of ult"]
+    ]
+  },
+  "Vindicta": {
+    items: [
+      ["Knockdown","Incredibly effective — forces her to buy Debuff Remover"],
+      ["Phantom Strike","Ruins her day — she can't play unless she pre-counters it"],
+      ["Slowing Hex","Stops her using Flight"],
+      ["Counter Spell","Also forces a counter-buy from her"]
+    ]
+  },
+  "Viscous": {
+    items: [
+      ["Curse","The cube is a buff — Curse removes it"],
+      ["Rebuttal","Parry the puddle punch: heal + 30% damage amp"]
+    ]
+  },
+  "Viper": {
+    items: [
+      ["Return Fire","Returns pre-mitigated damage — she kills herself (~1,600)"],
+      ["Metal Skin","Survive her — won't stop poison, stops the damage"],
+      ["Disarming Hex","Survive her damage output"],
+      ["Knockdown","Kills her momentum and stuns her"],
+      ["Dispel Magic","Removes her poison"],
+      ["Indomitable","Stops the stun — she has to proc it to ult"]
+    ]
+  },
+  "Warden": {
+    items: [
+      ["Dispel Magic","First choice vs cage-max Warden"],
+      ["Unstoppable","The alternative vs his cage"],
+      ["Metal Skin","If he gets super fed (usually the better pick)"],
+      ["Plated Armor","If he gets super fed"],
+      ["Healbane","Generic anti-heal on his ult"]
+    ]
+  },
+  "Wraith": {
+    items: [
+      ["Unstoppable","Press it after her instant ult and leave completely free"],
+      ["Indomitable","Works on her instant ult — but Unstop is usually better"],
+      ["Plated Armor","Stops her card buildup — most of her damage"]
+    ]
+  },
+  "Yamato": {
+    items: [
+      ["Debuff Remover","Her 2 is a point-and-click signal — remove it"],
+      ["Spirit Resist","All her damage is spirit"],
+      ["Curse","Stop her using her ultimate"],
+      ["Silencer","Stop her using her ultimate"],
+      ["Silence Wave","Stop her using her ultimate"],
+      ["Counter Spell","Her damage is telegraphed even mid-ult"]
+    ]
+  }
+};
+
+/* Short general blurbs for items (shown under the item name). */
+const BLURBS = {
+  "Dispel Magic":"Removes debuffs — the most general defensive item.",
+  "Slowing Hex":"Slows the target and cuts most movement abilities.",
+  "Counter Spell":"Reflects/blocks the next ability used on you.",
+  "Unstoppable":"Immune to CC and debuffs for a short window.",
+  "Indomitable":"One-charge save from a single stun instance.",
+  "Knockdown":"Point-and-click hard CC — grounds fliers.",
+  "Metal Skin":"Brief full bullet-damage immunity.",
+  "Plated Armor":"Reduces incoming burst / stack buildup.",
+  "Debuff Remover":"Clears debuffs off yourself.",
+  "Debuff Reducer":"Shortens the duration of debuffs on you.",
+  "Spellbreaker":"Spirit resist + shortens debuffs.",
+  "Spirit Resist":"Flat spirit damage reduction.",
+  "Spirit Resilience":"Spirit resist that ramps under fire.",
+  "Ethereal Shift":"Go intangible to wait out an ability.",
+  "Warp Stone":"Short blink to reposition or dodge.",
+  "Return Fire":"Reflects a share of incoming damage.",
+  "Ricochet":"Bullets bounce to nearby targets.",
+  "Rebuttal":"Melee parry — big resist + counter.",
+  "Juggernaut":"Melee resist and sustain.",
+  "Decay":"Anti-heal + %-HP damage over time.",
+  "Toxic Bullets":"On-hit anti-heal + %-HP damage.",
+  "Healbane":"Applies healing reduction.",
+  "Spirit Burn":"Spirit DoT with healing reduction.",
+  "Curse":"Silences and strips buffs (incl. Cheat Death).",
+  "Silence Wave":"AoE silence.",
+  "Silencer":"On-hit silence buildup + spirit-damage cut.",
+  "Divine Barrier":"Big shield that can negate a hit.",
+  "Disarming Hex":"Disables the target's weapon.",
+  "Phantom Strike":"Gap-close that yanks you to a target.",
+  "Rescue Beam":"Pull an ally to you.",
+  "Monster Rounds":"Bonus damage to NPCs / creeps.",
+  "Cultist Sacrifice":"Removes an NPC / minion.",
+  "Rusted Barrel":"Early gun-damage reduction debuff.",
+  "Enchanter's Barrier":"Spirit shield.",
+  "Anvil":"Slow + on-hit setup.",
+  "Stuns":"Any hard stun in your kit/items."
+};
+
+const AVOID_TONE = true;
+const heroNames = Object.keys(DATA).sort((a,b)=>a.localeCompare(b));
+const selected = new Set();
+
+/* Deterministic hue per hero for the monogram tile */
+function hue(name){ let h=0; for(const c of name) h=(h*31+c.charCodeAt(0))%360; return h; }
+function initials(name){
+  const parts=name.replace(/&/g,' ').split(/[\s-]+/).filter(Boolean);
+  if(parts.length===1) return parts[0].slice(0,2).toUpperCase();
+  return (parts[0][0]+parts[1][0]).toUpperCase();
+}
+
+const grid=document.getElementById('heroGrid');
+heroNames.forEach(name=>{
+  const b=document.createElement('button');
+  b.type='button'; b.className='hero'; b.setAttribute('aria-pressed','false');
+  b.dataset.name=name;
+  const h=hue(name);
+  b.innerHTML=`<span class="mono" style="background:linear-gradient(145deg,hsl(${h} 55% 62%),hsl(${(h+35)%360} 60% 48%))">${initials(name)}</span><span class="name">${name}</span>`;
+  b.addEventListener('click',()=>toggle(name,b));
+  grid.appendChild(b);
+});
+
+function toggle(name,btn){
+  if(selected.has(name)){ selected.delete(name); btn.setAttribute('aria-pressed','false'); }
+  else { selected.add(name); btn.setAttribute('aria-pressed','true'); }
+  render();
+}
+
+document.getElementById('search').addEventListener('input',e=>{
+  const q=e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.hero').forEach(el=>{
+    el.classList.toggle('hidden', q && !el.dataset.name.toLowerCase().includes(q));
+  });
+});
+
+document.getElementById('clearBtn').addEventListener('click',()=>{
+  selected.clear();
+  document.querySelectorAll('.hero').forEach(el=>el.setAttribute('aria-pressed','false'));
+  render();
+});
+
+function render(){
+  document.getElementById('selCount').textContent=selected.size;
+  const res=document.getElementById('results');
+  const resInfo=document.getElementById('resInfo');
+
+  if(selected.size===0){
+    resInfo.textContent='';
+    res.innerHTML=`<div class="empty"><div class="big">No enemies selected yet.</div>Tap heroes on the left to build the enemy team and see what to buy.</div>`;
+    return;
+  }
+
+  const n=selected.size;
+  // aggregate recommended items
+  const map=new Map(); // item -> [{hero,why}]
+  const avoids=new Map(); // item -> [{hero,why}]
+  selected.forEach(hero=>{
+    (DATA[hero].items||[]).forEach(([item,why])=>{
+      if(!map.has(item)) map.set(item,[]);
+      map.get(item).push({hero,why});
+    });
+    (DATA[hero].avoid||[]).forEach(([item,why])=>{
+      if(!avoids.has(item)) avoids.set(item,[]);
+      avoids.get(item).push({hero,why});
+    });
+  });
+
+  const items=[...map.entries()].map(([item,list])=>({item,list,count:list.length}));
+  items.sort((a,b)=> b.count-a.count || a.item.localeCompare(b.item));
+  const maxCount=items[0].count;
+
+  resInfo.innerHTML=`vs <b style="color:var(--gold);font-variant-numeric:tabular-nums">${n}</b> ${n===1?'enemy':'enemies'}`;
+
+  let html='';
+  const overlapItems=items.filter(x=>x.count>=2);
+  const single=items.filter(x=>x.count<2);
+
+  if(overlapItems.length){
+    html+=`<div class="section-label">Best overlap — covers multiple threats</div>`;
+    html+=overlapItems.map(x=>itemCard(x,n,maxCount)).join('');
+  }
+  if(single.length){
+    html+=`<div class="section-label" style="margin-top:18px">Single-target answers</div>`;
+    html+=single.map(x=>itemCard(x,n,maxCount)).join('');
+  }
+
+  if(avoids.size){
+    html+=`<div class="section-label" style="margin-top:20px;color:var(--red)">Don't buy against this line-up</div>`;
+    html+=[...avoids.entries()].map(([item,list])=>{
+      const rows=list.map(r=>`<b>${r.hero}:</b> ${r.why}`).join('<br>');
+      return `<div class="avoid-item"><span class="aname">${item}</span><span class="why">${rows}</span></div>`;
+    }).join('');
+  }
+
+  res.innerHTML=html;
+}
+
+function itemCard(x,n,maxCount){
+  const isTop = x.count===maxCount && x.count>=2;
+  const blurb = BLURBS[x.item] ? `<span class="blurb">${BLURBS[x.item]}</span>` : '';
+  const chips = x.list.map(r=>`<span class="chip">${r.hero}</span>`).join('');
+  const reasons = x.list.map(r=>`<li><span class="who">${r.hero}</span><span class="txt">${r.why}</span></li>`).join('');
+  return `<div class="item${isTop?' top':''}">
+    <div class="item-head">
+      <div class="badge"><span class="num">${x.count}</span><span class="of">of ${n}</span></div>
+      <div class="item-name"><span class="n">${x.item}</span>${blurb}</div>
+      <div class="covers">${chips}</div>
+    </div>
+    <ul class="reasons">${reasons}</ul>
+  </div>`;
+}
+
+/* Theme toggle */
+const themeBtn=document.getElementById('themeBtn');
+themeBtn.addEventListener('click',()=>{
+  const cur=document.documentElement.getAttribute('data-theme');
+  const isDark = cur ? cur==='dark' : matchMedia('(prefers-color-scheme: dark)').matches;
+  document.documentElement.setAttribute('data-theme', isDark?'light':'dark');
+});
+
+render();
+</script>
