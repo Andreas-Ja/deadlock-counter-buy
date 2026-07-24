@@ -176,6 +176,14 @@
   .item.top .badge .num { color: #0d1311; }
   .badge .of { font-size: 9px; letter-spacing: .08em; color: var(--muted-2); font-weight: 700; margin-top: 1px; }
   .item.top .badge .of { color: rgba(13,19,17,.7); }
+  .item-icon {
+    flex: none; width: 42px; height: 42px; border-radius: 9px; overflow: hidden;
+    background: var(--raised-2); border: 1px solid var(--line); display: grid; place-items: center;
+  }
+  .item-icon img { width: 100%; height: 100%; object-fit: contain; display: block; }
+  .item-icon.no-art { font-weight: 800; color: var(--muted-2); font-size: 18px; }
+  .item-icon.sm { width: 34px; height: 34px; border-radius: 7px; }
+  .item.top .item-icon { border-color: var(--gold-dim); }
   .item-name { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
   .item-name .n { font-size: 16px; font-weight: 700; letter-spacing: -.01em; }
   .item-name .blurb { font-size: 12px; color: var(--muted); }
@@ -197,10 +205,11 @@
 
   /* Avoid section */
   .avoid-item {
-    display: grid; grid-template-columns: minmax(96px, auto) 1fr; gap: 12px;
+    display: grid; grid-template-columns: auto minmax(88px, auto) 1fr; align-items: center; gap: 12px;
     background: color-mix(in srgb, var(--red) 8%, var(--raised));
     border: 1px solid var(--red-dim); border-radius: 10px; padding: 11px 13px; margin-bottom: 9px;
   }
+  .avoid-item .item-icon { filter: grayscale(.4) brightness(.92); }
   .avoid-item .aname { font-weight: 700; color: var(--red); font-size: 14px; }
   .avoid-item .why { font-size: 12.5px; color: var(--muted); }
   .avoid-item .why b { color: var(--text); font-weight: 600; }
@@ -601,6 +610,27 @@ const IMG = {
 };
 const imgUrl = n => `img/${IMG[n]}.webp`;
 
+/* Item shop-icon filenames (in ./img/items/), keyed by item name. */
+const ITEMIMG = {
+  "Counter Spell":"counter_spell","Cultist Sacrifice":"cultist_sacrifice","Curse":"curse",
+  "Debuff Reducer":"debuff_reducer","Decay":"decay","Disarming Hex":"disarming_hex",
+  "Dispel Magic":"dispel_magic","Divine Barrier":"divine_barrier","Enchanter's Barrier":"enchanter_s_barrier",
+  "Ethereal Shift":"ethereal_shift","Healbane":"healbane","Indomitable":"indomitable",
+  "Juggernaut":"juggernaut","Knockdown":"knockdown","Metal Skin":"metal_skin",
+  "Monster Rounds":"monster_rounds","Phantom Strike":"phantom_strike","Plated Armor":"plated_armor",
+  "Rebuttal":"rebuttal","Rescue Beam":"rescue_beam","Return Fire":"return_fire","Ricochet":"ricochet",
+  "Rusted Barrel":"rusted_barrel","Silence Wave":"silence_wave","Silencer":"silencer",
+  "Slowing Hex":"slowing_hex","Spellbreaker":"spellbreaker","Spirit Burn":"spirit_burn",
+  "Spirit Resilience":"spirit_resilience","Spirit Resist":"spirit_resist","Toxic Bullets":"toxic_bullets",
+  "Unstoppable":"unstoppable","Warp Stone":"warp_stone"
+};
+/* Returns an <img> tag for an item icon, or a lettered placeholder if we have no art. */
+function itemIcon(name, cls){
+  const f = ITEMIMG[name];
+  if(f) return `<span class="${cls}"><img src="img/items/${f}.webp" alt="" loading="lazy"></span>`;
+  return `<span class="${cls} no-art">${name[0]}</span>`;
+}
+
 /* MUST-BUY picks (bolded in the notes) — the item that's near-mandatory vs this hero. */
 const MUST = {
   "Apollo":["Slowing Hex"], "Calico":["Slowing Hex"], "Drifter":["Disarming Hex"],
@@ -747,7 +777,7 @@ function render(){
     html+=`<div class="section-label" style="margin-top:20px;color:var(--red)">Don't buy against this line-up</div>`;
     html+=[...avoids.entries()].map(([item,list])=>{
       const rows=list.map(r=>`<b>${r.hero}:</b> ${r.why}`).join('<br>');
-      return `<div class="avoid-item"><span class="aname">${item}</span><span class="why">${rows}</span></div>`;
+      return `<div class="avoid-item">${itemIcon(item,'item-icon sm')}<span class="aname">${item}</span><span class="why">${rows}</span></div>`;
     }).join('');
   }
 
@@ -765,6 +795,7 @@ function itemCard(x,n,maxScore){
   return `<div class="item${isTop?' top':''}${x.mustCount>0?' has-must':''}">
     <div class="item-head">
       <div class="badge"><span class="num">${x.count}</span><span class="of">of ${n}</span></div>
+      ${itemIcon(x.item,'item-icon')}
       <div class="item-name"><span class="n">${x.item}${mustTag}</span>${blurb}</div>
       <div class="covers">${chips}</div>
     </div>
