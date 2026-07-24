@@ -1,3 +1,11 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="color-scheme" content="dark light">
+<meta name="description" content="Pick the enemy Deadlock heroes and get the best counter items, ranked by how many threats each one shuts down.">
+<meta name="theme-color" content="#0d1311">
 <title>Deadlock Counter-Buy Helper</title>
 <style>
   :root {
@@ -216,7 +224,93 @@
 
   footer { margin-top: 32px; color: var(--muted-2); font-size: 12px; text-align: center; line-height: 1.6; }
   footer a { color: var(--gold-dim); }
+
+  /* ---------- Mobile: single-pane view with a thumb-reachable tab bar ---------- */
+  .mtabs { display: none; }
+
+  @media (max-width: 860px) {
+    .wrap { padding: 14px 14px 96px; }
+    header { gap: 10px 14px; align-items: center; }
+    .brand { flex: 1 1 auto; gap: 4px; }
+    h1 { font-size: 22px; }
+    .sub { display: none; }            /* long intro is desktop-only — the UI explains itself */
+    .legend { gap: 5px 12px; margin-top: 2px; }
+    .lg { font-size: 11px; }
+    .lg-badge { width: 18px; height: 18px; font-size: 10px; }
+    .theme-toggle { padding: 7px 11px; font-size: 11.5px; }
+    .cols { gap: 0; margin-top: 14px; }
+
+    /* one pane at a time */
+    #panePick, #paneBuys { display: none; }
+    body.view-pick #panePick { display: block; }
+    body.view-buys #paneBuys { display: block; }
+
+    .card-head { padding: 13px 14px; position: sticky; top: 0; z-index: 5;
+      background: var(--panel); border-radius: 14px 14px 0 0; }
+    .card-body { padding: 14px; }
+
+    /* bigger, thumb-friendly hero tiles */
+    .grid { grid-template-columns: repeat(auto-fill, minmax(84px, 1fr)); gap: 9px; }
+    .hero { padding: 10px 4px 8px; gap: 6px; }
+    .portrait { width: 52px; height: 52px; }
+    .hero .name { font-size: 11px; }
+    .search { padding: 12px 13px; font-size: 16px; } /* 16px stops iOS zoom-on-focus */
+
+    /* result cards reflow to vertical */
+    .item { padding: 12px; }
+    .item-head { flex-wrap: wrap; gap: 10px; align-items: flex-start; }
+    .badge { width: 38px; height: 38px; border-radius: 9px; }
+    .badge .num { font-size: 16px; }
+    .badge .of { font-size: 8px; }
+    .item-icon { width: 38px; height: 38px; }
+    .item-name { flex: 1 1 60%; min-width: 0; }
+    .item-name .n { font-size: 15.5px; display: flex; flex-wrap: wrap; align-items: center; gap: 5px; }
+    .must-tag { margin-left: 0; }
+    .covers { display: none; }
+
+    .reasons { grid-template-columns: none; }
+    .reasons li { grid-template-columns: 1fr; gap: 3px; }
+    .reasons .who { font-size: 12.5px; }
+    .reasons .txt { padding-left: 27px; }
+
+    .avoid-item { grid-template-columns: auto 1fr; row-gap: 6px; }
+    .avoid-item .why { grid-column: 1 / -1; }
+
+    /* fixed bottom tab bar */
+    .mtabs {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px;
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+      padding: 9px 14px calc(9px + env(safe-area-inset-bottom));
+      background: color-mix(in srgb, var(--ground) 92%, transparent);
+      backdrop-filter: blur(12px); border-top: 1px solid var(--line);
+    }
+    .mtab {
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      padding: 12px 10px; border-radius: 10px; cursor: pointer;
+      background: var(--raised); border: 1px solid var(--line); color: var(--muted);
+      font: inherit; font-size: 13.5px; font-weight: 700; letter-spacing: .01em;
+    }
+    .mtab.active { background: var(--gold); border-color: var(--gold); color: #0d1311; }
+    .mtab-n {
+      min-width: 22px; padding: 1px 6px; border-radius: 999px; font-size: 12px;
+      font-variant-numeric: tabular-nums; background: var(--raised-2); color: var(--text);
+    }
+    .mtab.active .mtab-n { background: rgba(13,19,17,.22); color: #0d1311; }
+    footer { margin-top: 22px; }
+  }
+
+  @media (max-width: 380px) {
+    .grid { grid-template-columns: repeat(auto-fill, minmax(74px, 1fr)); gap: 7px; }
+    .portrait { width: 46px; height: 46px; }
+    .hero .name { font-size: 10.5px; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: .01ms !important; transition-duration: .01ms !important; }
+  }
 </style>
+</head>
+<body>
 
 <div class="wrap">
   <header>
@@ -234,7 +328,7 @@
 
   <div class="cols">
     <!-- Picker -->
-    <section class="card picker" aria-label="Enemy hero selection">
+    <section class="card picker" id="panePick" aria-label="Enemy hero selection">
       <div class="card-head">
         <span class="card-title">Enemy team</span>
         <span class="count-note" id="selInfo"><b id="selCount">0</b> selected</span>
@@ -250,7 +344,7 @@
     </section>
 
     <!-- Results -->
-    <section class="card" aria-label="Recommended counter items" aria-live="polite">
+    <section class="card" id="paneBuys" aria-label="Recommended counter items" aria-live="polite">
       <div class="card-head">
         <span class="card-title">Recommended buys</span>
         <span class="count-note" id="resInfo"></span>
@@ -263,6 +357,15 @@
       </div>
     </section>
   </div>
+
+  <nav class="mtabs" aria-label="Switch view">
+    <button type="button" class="mtab active" data-view="pick" aria-pressed="true">
+      <span class="mtab-l">Enemy team</span><span class="mtab-n" id="tabPickN">0</span>
+    </button>
+    <button type="button" class="mtab" data-view="buys" aria-pressed="false">
+      <span class="mtab-l">Buys</span><span class="mtab-n" id="tabBuyN">0</span>
+    </button>
+  </nav>
 
   <footer>
     Item advice compiled from a community counter-buying guide. Situational — adapt to your role and build.<br>
@@ -725,12 +828,14 @@ document.getElementById('clearBtn').addEventListener('click',()=>{
 
 function render(){
   document.getElementById('selCount').textContent=selected.size;
+  document.getElementById('tabPickN').textContent=selected.size;
   const res=document.getElementById('results');
   const resInfo=document.getElementById('resInfo');
 
   if(selected.size===0){
     resInfo.textContent='';
-    res.innerHTML=`<div class="empty"><div class="big">No enemies selected yet.</div>Tap heroes on the left to build the enemy team and see what to buy.</div>`;
+    document.getElementById('tabBuyN').textContent='0';
+    res.innerHTML=`<div class="empty"><div class="big">No enemies selected yet.</div>Pick the enemy heroes to see what to buy.</div>`;
     return;
   }
 
@@ -758,6 +863,7 @@ function render(){
   const maxScore=items[0].score;
 
   resInfo.innerHTML=`vs <b style="color:var(--gold);font-variant-numeric:tabular-nums">${n}</b> ${n===1?'enemy':'enemies'}`;
+  document.getElementById('tabBuyN').textContent=items.length;
 
   let html='';
   // "priority" = a must-buy vs anyone, or covers 2+ threats. everything else is situational.
@@ -803,6 +909,22 @@ function itemCard(x,n,maxScore){
   </div>`;
 }
 
+/* Mobile tab bar — one pane at a time on small screens */
+document.body.classList.add('view-pick');
+document.querySelectorAll('.mtab').forEach(t=>{
+  t.addEventListener('click',()=>{
+    const v=t.dataset.view;
+    document.body.classList.toggle('view-pick', v==='pick');
+    document.body.classList.toggle('view-buys', v==='buys');
+    document.querySelectorAll('.mtab').forEach(o=>{
+      const on=o===t;
+      o.classList.toggle('active',on);
+      o.setAttribute('aria-pressed', on?'true':'false');
+    });
+    window.scrollTo({top:0,behavior:'instant'});
+  });
+});
+
 /* Theme toggle */
 const themeBtn=document.getElementById('themeBtn');
 themeBtn.addEventListener('click',()=>{
@@ -813,3 +935,5 @@ themeBtn.addEventListener('click',()=>{
 
 render();
 </script>
+</body>
+</html>
