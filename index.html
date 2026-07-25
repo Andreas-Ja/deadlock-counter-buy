@@ -7,6 +7,22 @@
 <meta name="description" content="Pick the enemy Deadlock heroes and get the best counter items, ranked by how many threats each one shuts down.">
 <meta name="theme-color" content="#0d1311">
 <title>Deadlock Counter-Buy Helper</title>
+
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="favicon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<!-- iOS has no install prompt; these control how it looks once added to the home screen -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Counter-Buy">
+
+<!-- Analytics (GoatCounter): privacy-friendly, no cookies, so no consent banner is required.
+     To switch on: create a free site at https://www.goatcounter.com, then replace
+     MYCODE below with your site code and uncomment the tag.
+<script data-goatcounter="https://MYCODE.goatcounter.com/count"
+        async src="//gc.zgo.at/count.js"></script>
+-->
+
 <style>
   :root {
     --ground: #0d1311;
@@ -85,6 +101,12 @@
     font-weight: 600; letter-spacing: .04em; transition: color .15s, border-color .15s;
   }
   .theme-toggle:hover { color: var(--text); border-color: var(--gold-dim); }
+  .head-actions { display: flex; gap: 8px; align-items: center; }
+  .theme-toggle.install { color: var(--gold); border-color: var(--gold-dim); }
+  .theme-toggle.install:hover { background: var(--gold); color: #0d1311; border-color: var(--gold); }
+  .ios-tip { display: none; margin-top: 8px; }
+  body.ios-installable .ios-tip { display: block; }
+  .ios-tip b { color: var(--gold-dim); font-weight: 700; }
 
   /* Layout */
   .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.15fr); gap: 22px; margin-top: 24px; }
@@ -323,7 +345,10 @@
         <span class="lg"><span class="lg-star">★ Hard counter</span> shuts this hero down</span>
       </div>
     </div>
-    <button class="theme-toggle" id="themeBtn" type="button">◐ Theme</button>
+    <div class="head-actions">
+      <button class="theme-toggle install" id="installBtn" type="button" hidden>⤓ Install</button>
+      <button class="theme-toggle" id="themeBtn" type="button">◐ Theme</button>
+    </div>
   </header>
 
   <div class="cols">
@@ -368,6 +393,7 @@
   </nav>
 
   <footer>
+    <div class="ios-tip">Add to your home screen: tap <b>Share</b> → <b>Add to Home Screen</b>.</div>
     Item advice compiled from a community counter-buying guide. Situational — adapt to your role and build.<br>
     Not affiliated with Valve. Deadlock is a trademark of Valve Corporation.
   </footer>
@@ -908,6 +934,36 @@ function itemCard(x,n,maxScore){
     <ul class="reasons">${reasons}</ul>
   </div>`;
 }
+
+/* ---- Installable app (PWA) ---- */
+if('serviceWorker' in navigator){
+  addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{}));
+}
+
+const installBtn=document.getElementById('installBtn');
+let deferredPrompt=null;
+
+// Chrome/Edge/Android: the browser tells us when it's installable.
+addEventListener('beforeinstallprompt',e=>{
+  e.preventDefault();
+  deferredPrompt=e;
+  installBtn.hidden=false;
+});
+installBtn.addEventListener('click',async()=>{
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  await deferredPrompt.userChoice;
+  deferredPrompt=null;
+  installBtn.hidden=true;
+});
+addEventListener('appinstalled',()=>{ installBtn.hidden=true; deferredPrompt=null; });
+
+// iOS fires no such event and has no install button — surface the manual steps instead.
+(()=>{
+  const iOS=/iphone|ipad|ipod/i.test(navigator.userAgent);
+  const standalone=matchMedia('(display-mode: standalone)').matches || navigator.standalone===true;
+  if(iOS && !standalone) document.body.classList.add('ios-installable');
+})();
 
 /* Mobile tab bar — one pane at a time on small screens */
 document.body.classList.add('view-pick');

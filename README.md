@@ -22,6 +22,8 @@ No install, no login, works on phones. Share the link with your team and check c
   are flagged so you don't waste souls.
 - **Every counter is explained** — each item lists which enemy it answers and why.
 - **Item icons + hero photos**, light/dark themes, and a responsive layout for desktop or phone.
+- **Installable (PWA).** On phones it can be added to the home screen, launches full-screen
+  without browser chrome, and works offline — no app store, no install file.
 
 ## How the ranking works
 
@@ -38,9 +40,12 @@ So a hard-counter is worth roughly one extra threat covered. Items are then spli
 ## Project structure
 
 ```
-index.html        The entire app — data + UI + logic in one file, no build step.
-img/*.webp        38 hero portrait icons.
-img/items/*.webp  33 item shop icons.
+index.html             The entire app — data + UI + logic in one file, no build step.
+img/*.webp             38 hero portrait icons.
+img/items/*.webp       33 item shop icons.
+manifest.webmanifest   PWA metadata (name, icons, theme) that makes it installable.
+sw.js                  Service worker: network-first HTML, cache-first assets, offline support.
+icon-*.png             App icons, including a maskable variant for Android.
 ```
 
 All the game knowledge lives in a few JavaScript objects near the top of the `<script>` in

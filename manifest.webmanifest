@@ -1,0 +1,17 @@
+{
+  "name": "Deadlock Counter-Buy Helper",
+  "short_name": "Counter-Buy",
+  "description": "Pick the enemy Deadlock heroes and get the best counter items, ranked by how many threats each one shuts down.",
+  "start_url": ".",
+  "scope": ".",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0d1311",
+  "theme_color": "#0d1311",
+  "categories": ["games", "utilities"],
+  "icons": [
+    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icon-maskable.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
