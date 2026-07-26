@@ -392,7 +392,8 @@
 
   <footer>
     <div class="ios-tip">Add to your home screen: tap <b>Share</b> → <b>Add to Home Screen</b>.</div>
-    Item advice compiled from a community counter-buying guide. Situational — adapt to your role and build.<br>
+    Item advice adapted from a community counter-buying guide, with thanks to its creator.
+    Situational — adapt it to your own hero and build.<br>
     Not affiliated with Valve. Deadlock is a trademark of Valve Corporation.
   </footer>
 </div>
@@ -402,328 +403,327 @@
 const DATA = {
   "Abrams": {
     items: [
-      ["Rebuttal","Melee resist vs his melee-focused build"],
-      ["Juggernaut","Melee resist that slots in easily"],
-      ["Decay","Anti-heal + %-max/current HP damage"],
-      ["Toxic Bullets","Anti-heal + %-HP damage"],
-      ["Warp Stone","Dodge the charge and the slam"]
+      ["Rebuttal","Melee resistance against his melee-focused build"],
+      ["Juggernaut","Melee resistance that fits into most builds"],
+      ["Decay","Reduces his healing and deals percent-HP damage"],
+      ["Toxic Bullets","Reduces his healing and deals percent-HP damage"],
+      ["Warp Stone","Repositions out of the charge and the slam"]
     ],
-    avoid: [["Indomitable","His charge is two stun instances — burns Indom and still stuns you"]]
+    avoid: [["Indomitable","His charge applies two stun instances, so it triggers and still stuns"]]
   },
   "Apollo": {
     items: [
-      ["Slowing Hex","Shuts off 3 of his 4 abilities"],
-      ["Silence Wave","Counters his kit; use if he runs Debuff Remover"],
-      ["Counter Spell","Can counter his ultimate even after being silenced"],
-      ["Spirit Resist","Blunts his burst spirit damage"],
-      ["Spellbreaker","Shuts down most of his spirit burst"]
+      ["Slowing Hex","Disables three of his four abilities"],
+      ["Silence Wave","Silences him through his Debuff Remover"],
+      ["Counter Spell","Blocks his ultimate even after being silenced"],
+      ["Spirit Resist","Reduces his burst spirit damage"],
+      ["Spellbreaker","Reduces most of his spirit burst"]
     ]
   },
   "Bebop": {
     items: [
-      ["Indomitable","Completely negates his first hook"],
-      ["Unstoppable","Escape after you've been hooked"],
-      ["Warp Stone","Get around a corner and break line of sight after a hook"],
-      ["Counter Spell","Deals with the bomb"],
+      ["Indomitable","Negates the first hook"],
+      ["Unstoppable","Escapes after being hooked"],
+      ["Warp Stone","Breaks line of sight after a hook"],
+      ["Counter Spell","Blocks the bomb"],
       ["Dispel Magic","Removes the bomb"]
     ]
   },
   "Billy": {
     items: [
-      ["Rebuttal","Strong into his melee pressure"],
-      ["Slowing Hex","Stops him rising-ramming away for free"],
-      ["Counter Spell","Escape his ultimate"],
-      ["Unstoppable","Get out of his ultimate"],
-      ["Ethereal Shift","Get out of his ultimate"],
-      ["Dispel Magic","Dark horse — clears the Wrecked debuff and negates his damage"]
+      ["Rebuttal","Melee resistance against his melee pressure"],
+      ["Slowing Hex","Prevents a free escape with Rising Ram"],
+      ["Counter Spell","Blocks his ultimate"],
+      ["Unstoppable","Escapes his ultimate"],
+      ["Ethereal Shift","Waits out his ultimate"],
+      ["Dispel Magic","Clears the Wrecked debuff and cuts his damage"]
     ]
   },
   "Calico": {
     items: [
-      ["Slowing Hex","Shuts down all abilities except bomb"],
-      ["Silence Wave","Shuts down all of her abilities"],
-      ["Curse","Catches her when cooldowns are up — she's very mobile"],
-      ["Spirit Resilience","Survive her all-spirit burst combo"]
+      ["Slowing Hex","Disables every ability except the bomb"],
+      ["Silence Wave","Disables her full kit"],
+      ["Curse","Catches her while her mobility cooldowns are available"],
+      ["Spirit Resilience","Survives her spirit burst combo"]
     ]
   },
   "Celeste": {
     items: [
-      ["Slowing Hex","Added gravity helps drag her down and chase"],
-      ["Knockdown","Gets her out of the sky and onto the floor"],
-      ["Dispel Magic","Removes the Light Eater sack — nullifies most damage"],
-      ["Disarming Hex","Dark horse — she's a secret gun character; turn the gun off"]
+      ["Slowing Hex","Added gravity pulls her down and aids the chase"],
+      ["Knockdown","Brings her out of the air to the ground"],
+      ["Dispel Magic","Removes the Light Eater sack and most of her damage"],
+      ["Disarming Hex","Disables her weapon, which carries much of her damage"]
     ]
   },
   "The Doorman": {
     items: [
-      ["Silence Wave","His door isn't a movement ability — you must CC him"],
-      ["Curse","Removes Cheat Death; strong before his ult goes unstoppable"],
-      ["Warp Stone","Escape the setup outside his ultimate"],
-      ["Unstoppable","Stops the time-slow after leaving his ult"],
-      ["Counter Spell","Avoid the initial door hit or the exit setup"]
+      ["Silence Wave","Silences him; his door is not a movement ability"],
+      ["Curse","Removes Cheat Death before his ultimate gains Unstoppable"],
+      ["Warp Stone","Repositions out of the setup after his ultimate"],
+      ["Unstoppable","Prevents the time-slow on leaving his ultimate"],
+      ["Counter Spell","Blocks the initial door hit or the exit setup"]
     ],
-    avoid: [["Slowing Hex","His door is not a movement ability — Slowing Hex does nothing"]]
+    avoid: [["Slowing Hex","His door is not a movement ability, so slows do not affect it"]]
   },
   "Drifter": {
     items: [
-      ["Debuff Remover","His kit is all debuffs — pop it on the mark to clear toxic proc too"],
-      ["Counter Spell","His ult is obvious; pre-counter it for free"],
-      ["Disarming Hex","He's a gun character — does nothing without his gun"],
-      ["Divine Barrier","Completely nullifies his ultimate"],
-      ["Metal Skin","Useful if he stacks a lot (won't stop debuffs)"]
+      ["Debuff Remover","Clears his mark and toxic proc; use it on the mark"],
+      ["Counter Spell","His ultimate is telegraphed and can be blocked early"],
+      ["Disarming Hex","Disables the weapon his kit depends on"],
+      ["Divine Barrier","Nullifies his ultimate"],
+      ["Metal Skin","Blocks damage at high stacks, though debuffs still apply"]
     ]
   },
   "Dynamo": {
     items: [
-      ["Unstoppable","Your only real out of his ultimate — hope you hit it"],
-      ["Rescue Beam","Pull teammates out of his ult"]
+      ["Unstoppable","The main escape from his ultimate, if timed correctly"],
+      ["Rescue Beam","Pulls teammates out of his ultimate"]
     ],
-    avoid: [["Indomitable","Does not work against his ultimate"]]
+    avoid: [["Indomitable","Does not trigger on his ultimate"]]
   },
   "Graves": {
     items: [
-      ["Ricochet","Procs off skulls and ghouls — clears an entire wave fast"],
-      ["Dispel Magic","Escape the wall / remove the toxic bullets proc"],
-      ["Return Fire","Can destroy the skulls on the same frame they hit you"]
+      ["Ricochet","Bounces off skulls and ghouls to clear waves quickly"],
+      ["Dispel Magic","Escapes the wall and removes the toxic proc"],
+      ["Return Fire","Can destroy skulls when they hit on the same frame"]
     ]
   },
   "Grey Talon": {
     items: [
-      ["Rusted Barrel","Surprisingly strong in the early lane vs his gun"],
-      ["Slowing Hex","Shuts down his late-game spirit pivot"],
-      ["Knockdown","Shuts him down once he goes spirit"],
-      ["Spellbreaker","Negates most charge-shot damage (mystic shot removes it though)"]
+      ["Rusted Barrel","Reduces his weapon damage in the early lane"],
+      ["Slowing Hex","Limits him after his late-game spirit pivot"],
+      ["Knockdown","Interrupts him once he builds spirit"],
+      ["Spellbreaker","Reduces charge-shot damage, though Mystic Shot removes it"]
     ]
   },
   "Haze": {
     items: [
-      ["Indomitable","Instant pick over Unstoppable — saves you from her unpredictable combo"],
-      ["Plated Armor","Stops her stack buildup — she can't Curse it off"],
-      ["Metal Skin","Avoids damage temporarily (stacks still land — remove with Dispel)"]
+      ["Indomitable","Preferred over Unstoppable; her combo is hard to predict"],
+      ["Plated Armor","Stops her stack buildup and cannot be removed by Curse"],
+      ["Metal Skin","Blocks damage temporarily, though stacks still apply"]
     ]
   },
   "Holliday": {
     items: [
-      ["Counter Spell","Counter the lasso if you hear the wind-up"],
-      ["Unstoppable","Also beats the lasso with good reactions"],
-      ["Indomitable","Basically immune — her lasso just gives you a big shield 1v1"],
-      ["Spirit Resist","Blunts her barrels"],
-      ["Slowing Hex","Shuts down her jump pads"]
+      ["Counter Spell","Blocks the lasso if you catch the wind-up"],
+      ["Unstoppable","Also beats the lasso with a fast reaction"],
+      ["Indomitable","Negates the lasso, which instead grants a large shield"],
+      ["Spirit Resist","Reduces her barrel damage"],
+      ["Slowing Hex","Disables her jump pads"]
     ]
   },
   "Infernus": {
     items: [
-      ["Dispel Magic","#1 pick — instantly removes his burn proc"],
-      ["Counter Spell","Avoid the range of his ultimate"],
-      ["Warp Stone","Avoid the range of his ultimate"],
-      ["Plated Armor","Stops his 3 building up (prefer vs Haze/Wraith too)"],
-      ["Juggernaut","Stops his 3 building up (prefer vs another M1)"]
+      ["Dispel Magic","Removes his burn immediately"],
+      ["Counter Spell","Avoids his ultimate"],
+      ["Warp Stone","Repositions out of his ultimate's range"],
+      ["Plated Armor","Stops his third ability from stacking"],
+      ["Juggernaut","Stops his third ability from stacking; better against weapon carries"]
     ]
   },
   "Ivy": {
     items: [
-      ["Dispel Magic","Great vs gun/Capacitor Ivy builds"],
-      ["Metal Skin","Vs gun Ivy — mostly full gun damage"],
-      ["Counter Spell","Counter Stone Form and walk away completely free"],
-      ["Unstoppable","Out of her setup vs spirit builds"]
+      ["Dispel Magic","Effective against her weapon and Capacitor builds"],
+      ["Metal Skin","Blocks her weapon damage on gun builds"],
+      ["Counter Spell","Blocks Stone Form and allows a free disengage"],
+      ["Unstoppable","Escapes her setup on spirit builds"]
     ]
   },
   "Kelvin": {
     items: [
-      ["Slowing Hex","Hex him early, before he uses Path"],
-      ["Knockdown","Knocks him out of the sky through Path"],
-      ["Silence Wave","Well-timed, stops him getting his ult off"],
-      ["Toxic Bullets","Anti-heal for his ult (he's shaped like a fridge)"],
-      ["Healbane","Anti-heal for his ult"],
-      ["Spirit Burn","Anti-heal for his ult"],
-      ["Ethereal Shift","Time out his ult from inside the dome and escape"]
+      ["Slowing Hex","Apply before Path; it does not stop an active Path"],
+      ["Knockdown","Brings him down through Path"],
+      ["Silence Wave","Prevents his ultimate when timed well"],
+      ["Toxic Bullets","Reduces the healing from his ultimate"],
+      ["Healbane","Reduces the healing from his ultimate"],
+      ["Spirit Burn","Reduces the healing from his ultimate"],
+      ["Ethereal Shift","Waits out his ultimate from inside the dome"]
     ]
   },
   "Lady Geist": {
     items: [
-      ["Decay","She heals a lot — strong when she's low"],
-      ["Silencer","One of the few ways to actually shut her down"],
-      ["Silence Wave","Stop her getting her ult off"],
-      ["Dispel Magic","Remove one of her drains"],
-      ["Counter Spell","Counter her ultimate (for ballers)"],
-      ["Metal Skin","Very late game — she becomes a gun carry"],
-      ["Plated Armor","Very late game — she becomes a gun carry"]
+      ["Decay","Reduces her healing, strongest at low HP"],
+      ["Silencer","One of the few reliable ways to shut her down"],
+      ["Silence Wave","Prevents her ultimate"],
+      ["Dispel Magic","Removes one of her drains"],
+      ["Counter Spell","Blocks her ultimate, though the timing is tight"],
+      ["Metal Skin","For late game, when she scales into a weapon carry"],
+      ["Plated Armor","For late game, when she scales into a weapon carry"]
     ]
   },
   "Lash": {
     items: [
-      ["Ethereal Shift","Strongest item vs Lash — his slam does zero and he's committed"],
-      ["Spirit Resilience","Survive a huge chunk of his spirit damage"],
-      ["Enchanter's Barrier","Stack spirit resist to survive his combo"],
-      ["Indomitable","Avoid his ultimate"],
-      ["Unstoppable","Avoid his ultimate"],
-      ["Counter Spell","Avoid his ultimate"],
-      ["Slowing Hex","Cripples his escape and re-engage"],
-      ["Anvil","Punish him when he goes to look"]
+      ["Ethereal Shift","Makes his slam deal no damage after he commits"],
+      ["Spirit Resilience","Reduces a large share of his spirit damage"],
+      ["Enchanter's Barrier","Stacks spirit resistance to survive his combo"],
+      ["Indomitable","Avoids his ultimate"],
+      ["Unstoppable","Avoids his ultimate"],
+      ["Counter Spell","Blocks his ultimate"],
+      ["Slowing Hex","Limits his escape and re-engage"],
+      ["Anvil","Punishes him while he sets up"]
     ]
   },
   "McGinnis": {
     items: [
-      ["Monster Rounds","Turrets count as NPCs — increases your damage to them"],
-      ["Cultist Sacrifice","Deal with her turret NPCs"],
-      ["Knockdown","Bring two — she buys Indom every game"],
-      ["Stuns","Have hard CC available to break her setup"]
+      ["Monster Rounds","Turrets count as NPCs, so your damage to them increases"],
+      ["Cultist Sacrifice","Removes a turret outright"],
+      ["Knockdown","Bring two; she typically builds Indomitable"],
+      ["Stuns","Hard CC breaks her setup"]
     ]
   },
   "Mina": {
     items: [
-      ["Slowing Hex","Pop it — but she'll Debuff Remove it, so bring a second"],
-      ["Silence Wave","Shut her down"],
-      ["Curse","Shut her down"]
+      ["Slowing Hex","She will remove it, so a second source is needed"],
+      ["Silence Wave","Shuts her down"],
+      ["Curse","Shuts her down"]
     ],
-    avoid: [["Knockdown","Ineffective — she just uses Bats on the timer"]]
+    avoid: [["Knockdown","Ineffective; she uses Bats on a timer"]]
   },
   "Mirage": {
     items: [
-      ["Dispel Magic","His kit is debuffs — clears beetle, marks, damage-red and stops his heal"],
-      ["Unstoppable","Great vs the tornado build; also carries debuff reduction"],
-      ["Slowing Hex","Solid — but bring two of them"]
+      ["Dispel Magic","Clears the beetle, marks and damage reduction, and stops his heal"],
+      ["Unstoppable","Effective against the tornado build and adds debuff reduction"],
+      ["Slowing Hex","Effective, but a second source is needed"]
     ]
   },
   "Mo & Krill": {
     items: [
-      ["Debuff Reducer","Insane vs his ultimate — bare minimum pickup"],
-      ["Toxic Bullets","Anti-heal vs a large-HP target"],
-      ["Decay","Anti-heal vs a large-HP target"],
-      ["Indomitable","Valid way to deal with the combo"],
-      ["Unstoppable","Valid way to deal with the combo"],
-      ["Counter Spell","Can avoid the combo — but it's still difficult (*)"]
+      ["Debuff Reducer","Strong against his ultimate; the minimum pickup"],
+      ["Toxic Bullets","Reduces healing on a high-HP target"],
+      ["Decay","Reduces healing on a high-HP target"],
+      ["Indomitable","Answers the combo"],
+      ["Unstoppable","Answers the combo"],
+      ["Counter Spell","Can avoid the combo, though the timing is difficult"]
     ]
   },
   "Paige": {
     items: [
-      ["Dispel Magic","Hard-counter — clears her knockdown and her root. That's it, just buy it"],
-      ["Unstoppable","The alternative if you skip Dispel"]
+      ["Dispel Magic","Clears both her knockdown and her root"],
+      ["Unstoppable","The alternative if Dispel Magic is unavailable"]
     ]
   },
   "Paradox": {
     items: [
-      ["Indomitable","Her Carbine doesn't proc it — only the ult does"],
-      ["Dispel Magic","Her amp stacks as a debuff — remove it"]
+      ["Indomitable","Her Carbine does not trigger it; only the ultimate does"],
+      ["Dispel Magic","Removes her stacking amp debuff"]
     ]
   },
   "Pocket": {
     items: [
-      ["Slowing Hex","One of the few items that shuts him down — stops him taking the cloak"],
-      ["Silence Wave","Stops him entering the briefcase to dodge your Hex"],
-      ["Curse","Stops him entering the briefcase to dodge your Hex"],
-      ["Counter Spell","His ultimate is very telegraphed"],
-      ["Divine Barrier","Negates the ult"]
+      ["Slowing Hex","Prevents him from retrieving the cloak"],
+      ["Silence Wave","Stops him entering the briefcase to avoid the slow"],
+      ["Curse","Stops him entering the briefcase to avoid the slow"],
+      ["Counter Spell","His ultimate is heavily telegraphed"],
+      ["Divine Barrier","Negates his ultimate"]
     ]
   },
   "Rem": {
     items: [
-      ["Slowing Hex","Stops his 2 — deny the jump to an ally"],
-      ["Counter Spell","His ult is telegraphed — free to counter"],
-      ["Decay","Anti-heal — he's putting up big heal numbers lately"],
-      ["Healbane","Generic anti-heal against his healing"]
+      ["Slowing Hex","Stops his second ability from jumping to an ally"],
+      ["Counter Spell","His ultimate is telegraphed and easy to block"],
+      ["Decay","Reduces his healing output"],
+      ["Healbane","Reduces his healing output"]
     ]
   },
   "Seven": {
     items: [
-      ["Dispel Magic","Remove his telegraphed point-and-click stun (and toxic proc)"],
-      ["Knockdown","Have an ally hold it for when he's ulting"],
-      ["Unstoppable","Escape the ult — forces him to buy his own Unstop"],
-      ["Disarming Hex","He's a gun carry — turn the gun off"]
+      ["Dispel Magic","Removes his point-and-click stun and toxic proc"],
+      ["Knockdown","Have an ally hold it for his ultimate"],
+      ["Unstoppable","Escapes his ultimate and forces a counter-buy"],
+      ["Disarming Hex","Disables the weapon his damage depends on"]
     ]
   },
   "Shiv": {
     items: [
-      ["Dispel Magic","Clears his debuff pile — decay, knives, dash stacks"],
-      ["Spellbreaker","Cuts the chunk and shortens every debuff's duration"],
-      ["Decay","Basic healing reduction is good vs him"],
-      ["Healbane","Basic healing reduction is good vs him"]
+      ["Dispel Magic","Clears his stacked debuffs, including decay and knives"],
+      ["Spellbreaker","Reduces his burst and shortens every debuff"],
+      ["Decay","Reduces his healing"],
+      ["Healbane","Reduces his healing"]
     ]
   },
   "Silver": {
     items: [
-      ["Return Fire","Slamfire makes her take huge damage (human form)"],
-      ["Metal Skin","Survive wolf form — she basically can't kill you through it"],
-      ["Warp Stone","Warp over her dash and she flies past like a matador"],
-      ["Disarming Hex","Ulting Silver can't use her claws"],
-      ["Slowing Hex","Can't dash — makes her easy to avoid"]
+      ["Return Fire","Slamfire returns significant damage in human form"],
+      ["Metal Skin","Blocks nearly all of her wolf-form damage"],
+      ["Warp Stone","Her dash stops on collision; move over it to avoid"],
+      ["Disarming Hex","Disables her claws during the ultimate"],
+      ["Slowing Hex","Removes her dash, making her easier to avoid"]
     ]
   },
   "Sinclair": {
     items: [
-      ["Slowing Hex","Stops his back-and-forth teleport"],
-      ["Knockdown","Generically good when he goes to look"],
-      ["Unstoppable","Depends on the ults he grabs — solid answer"],
-      ["Spellbreaker","For his 1,000-damage bolts"]
+      ["Slowing Hex","Stops his repeated teleports"],
+      ["Knockdown","Interrupts him while he sets up"],
+      ["Unstoppable","Answers most of the ultimates he can copy"],
+      ["Spellbreaker","Reduces his high-damage bolts"]
     ]
   },
   "Venator": {
     items: [
-      ["Metal Skin","He's a gun and nothing but a gun — even blocks his entire ult"],
-      ["Disarming Hex","Can't shoot his gun — can't even fire his ult"]
+      ["Metal Skin","Blocks his weapon damage, including his ultimate"],
+      ["Disarming Hex","Disables his weapon, preventing his ultimate"]
     ]
   },
   "Victor": {
     items: [
-      ["Decay","Anti-heal — deny the heal thing, it's the only way to kill him"],
-      ["Healbane","Anti-heal against his sustain"],
-      ["Spirit Burn","Anti-heal against his sustain"],
-      ["Slowing Hex","He's slow and lumbering — get out of his healing zone"],
-      ["Curse","Shut down his infuser or catch him right out of ult"]
+      ["Decay","Reduces the healing that keeps him alive"],
+      ["Healbane","Reduces his sustain"],
+      ["Spirit Burn","Reduces his sustain"],
+      ["Slowing Hex","He moves slowly, so it helps you leave his healing zone"],
+      ["Curse","Disables his infuser or catches him after his ultimate"]
     ]
   },
   "Vindicta": {
     items: [
-      ["Knockdown","Incredibly effective — forces her to buy Debuff Remover"],
-      ["Phantom Strike","Ruins her day — she can't play unless she pre-counters it"],
-      ["Slowing Hex","Stops her using Flight"],
-      ["Counter Spell","Also forces a counter-buy from her"]
+      ["Knockdown","Highly effective; forces her to buy Debuff Remover"],
+      ["Phantom Strike","Closes onto her; she cannot play around it without a pre-block"],
+      ["Slowing Hex","Prevents her from using Flight"],
+      ["Counter Spell","Forces a counter-buy from her"]
     ]
   },
   "Viscous": {
     items: [
-      ["Curse","The cube is a buff — Curse removes it"],
-      ["Rebuttal","Parry the puddle punch: heal + 30% damage amp"]
+      ["Curse","The cube is a buff, so Curse removes it"],
+      ["Rebuttal","Parries the puddle punch for healing and a damage amp"]
     ]
   },
   "Vyper": {
     items: [
-      ["Return Fire","Returns pre-mitigated damage — she kills herself (~1,600)"],
-      ["Metal Skin","Survive her — won't stop poison, stops the damage"],
-      ["Disarming Hex","Survive her damage output"],
-      ["Knockdown","Kills her momentum and stuns her"],
+      ["Return Fire","Returns pre-mitigated damage; scales with your resistances"],
+      ["Metal Skin","Blocks her damage, though poison still builds"],
+      ["Disarming Hex","Disables her weapon damage"],
+      ["Knockdown","Stops her momentum and stuns her"],
       ["Dispel Magic","Removes her poison"],
-      ["Indomitable","Stops the stun — she has to proc it to ult"]
+      ["Indomitable","Blocks the stun she needs to land before her ultimate"]
     ]
   },
   "Warden": {
     items: [
-      ["Dispel Magic","First choice vs cage-max Warden"],
-      ["Unstoppable","The alternative vs his cage"],
-      ["Metal Skin","If he gets super fed (usually the better pick)"],
-      ["Plated Armor","If he gets super fed"],
-      ["Healbane","Generic anti-heal on his ult"]
+      ["Dispel Magic","The first answer to a cage-focused build"],
+      ["Unstoppable","The alternative against his cage"],
+      ["Metal Skin","For when he is far ahead"],
+      ["Plated Armor","For when he is far ahead"],
+      ["Healbane","Reduces the healing from his ultimate"]
     ]
   },
   "Wraith": {
     items: [
-      ["Unstoppable","Press it after her instant ult and leave completely free"],
-      ["Indomitable","Works on her instant ult — but Unstop is usually better"],
-      ["Plated Armor","Stops her card buildup — most of her damage"]
+      ["Unstoppable","Leaves her ultimate cleanly; it cannot be debuff-removed"],
+      ["Indomitable","Also answers her instant ultimate"],
+      ["Plated Armor","Stops her card buildup, which carries most of her damage"]
     ]
   },
   "Yamato": {
     items: [
-      ["Debuff Remover","Her 2 is a point-and-click signal — remove it"],
-      ["Spirit Resist","All her damage is spirit"],
-      ["Curse","Stop her using her ultimate"],
-      ["Silencer","Stop her using her ultimate"],
-      ["Silence Wave","Stop her using her ultimate"],
-      ["Counter Spell","Her damage is telegraphed even mid-ult"]
+      ["Debuff Remover","Removes her point-and-click mark"],
+      ["Spirit Resist","All of her damage is spirit"],
+      ["Curse","Prevents her ultimate"],
+      ["Silencer","Prevents her ultimate"],
+      ["Silence Wave","Prevents her ultimate"],
+      ["Counter Spell","Her damage is telegraphed, including during her ultimate"]
     ]
   }
 };
-
 /* Hero portrait filenames (in ./img/), keyed by display name. */
 const IMG = {
   "Abrams":"bull","Apollo":"fencer","Bebop":"bebop","Billy":"punkgoat","Calico":"nano",
@@ -770,42 +770,42 @@ const isMust = (hero,item) => (MUST[hero]||[]).includes(item);
 
 /* Short general blurbs for items (shown under the item name). */
 const BLURBS = {
-  "Dispel Magic":"Removes debuffs — the most general defensive item.",
-  "Slowing Hex":"Slows the target and cuts most movement abilities.",
-  "Counter Spell":"Reflects/blocks the next ability used on you.",
-  "Unstoppable":"Immune to CC and debuffs for a short window.",
-  "Indomitable":"One-charge save from a single stun instance.",
-  "Knockdown":"Point-and-click hard CC — grounds fliers.",
-  "Metal Skin":"Brief full bullet-damage immunity.",
-  "Plated Armor":"Reduces incoming burst / stack buildup.",
-  "Debuff Remover":"Clears debuffs off yourself.",
+  "Dispel Magic":"Removes debuffs from yourself.",
+  "Slowing Hex":"Slows the target and disables most movement abilities.",
+  "Counter Spell":"Blocks the next ability used on you.",
+  "Unstoppable":"Grants brief immunity to crowd control and debuffs.",
+  "Indomitable":"Blocks a single stun instance, once per cooldown.",
+  "Knockdown":"Applies targeted hard crowd control and grounds fliers.",
+  "Metal Skin":"Blocks bullet damage for a short duration.",
+  "Plated Armor":"Reduces incoming burst damage and stack buildup.",
+  "Debuff Remover":"Clears debuffs from yourself.",
   "Debuff Reducer":"Shortens the duration of debuffs on you.",
-  "Spellbreaker":"Spirit resist + shortens debuffs.",
-  "Spirit Resist":"Flat spirit damage reduction.",
-  "Spirit Resilience":"Spirit resist that ramps under fire.",
-  "Ethereal Shift":"Go intangible to wait out an ability.",
-  "Warp Stone":"Short blink to reposition or dodge.",
-  "Return Fire":"Reflects a share of incoming damage.",
-  "Ricochet":"Bullets bounce to nearby targets.",
-  "Rebuttal":"Melee parry — big resist + counter.",
-  "Juggernaut":"Melee resist and sustain.",
-  "Decay":"Anti-heal + %-HP damage over time.",
-  "Toxic Bullets":"On-hit anti-heal + %-HP damage.",
-  "Healbane":"Applies healing reduction.",
-  "Spirit Burn":"Spirit DoT with healing reduction.",
-  "Curse":"Silences and strips buffs (incl. Cheat Death).",
-  "Silence Wave":"AoE silence.",
-  "Silencer":"On-hit silence buildup + spirit-damage cut.",
-  "Divine Barrier":"Big shield that can negate a hit.",
+  "Spellbreaker":"Adds spirit resistance and shortens debuffs.",
+  "Spirit Resist":"Reduces incoming spirit damage.",
+  "Spirit Resilience":"Builds spirit resistance while under fire.",
+  "Ethereal Shift":"Turns you intangible to wait out an ability.",
+  "Warp Stone":"Blinks a short distance to reposition.",
+  "Return Fire":"Reflects a portion of incoming damage.",
+  "Ricochet":"Bounces bullets to nearby targets.",
+  "Rebuttal":"Parries melee for resistance and a counter-hit.",
+  "Juggernaut":"Adds melee resistance and sustain.",
+  "Decay":"Reduces healing and deals damage over time.",
+  "Toxic Bullets":"Reduces healing and deals percent-HP damage on hit.",
+  "Healbane":"Reduces the target's healing.",
+  "Spirit Burn":"Deals spirit damage over time and reduces healing.",
+  "Curse":"Silences the target and strips buffs, including Cheat Death.",
+  "Silence Wave":"Silences targets in an area.",
+  "Silencer":"Builds toward a silence on hit and cuts spirit damage.",
+  "Divine Barrier":"Grants a large shield that can negate a hit.",
   "Disarming Hex":"Disables the target's weapon.",
-  "Phantom Strike":"Gap-close that yanks you to a target.",
-  "Rescue Beam":"Pull an ally to you.",
-  "Monster Rounds":"Bonus damage to NPCs / creeps.",
-  "Cultist Sacrifice":"Removes an NPC / minion.",
-  "Rusted Barrel":"Early gun-damage reduction debuff.",
-  "Enchanter's Barrier":"Spirit shield.",
-  "Anvil":"Slow + on-hit setup.",
-  "Stuns":"Any hard stun in your kit/items."
+  "Phantom Strike":"Teleports you to a target.",
+  "Rescue Beam":"Pulls an ally to you.",
+  "Monster Rounds":"Increases damage dealt to NPCs.",
+  "Cultist Sacrifice":"Removes an NPC or minion.",
+  "Rusted Barrel":"Reduces the target's weapon damage early.",
+  "Enchanter's Barrier":"Grants a spirit shield.",
+  "Anvil":"Applies a slow and sets up follow-up damage.",
+  "Stuns":"Any hard crowd control available to you."
 };
 
 const AVOID_TONE = true;
