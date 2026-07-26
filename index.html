@@ -68,7 +68,21 @@
     line-height: 1.5;
     min-height: 100vh;
   }
-  .wrap { max-width: 1180px; margin: 0 auto; padding: 28px 20px 80px; }
+  /* Safe-area insets: the installed app runs edge-to-edge under the notch / Dynamic
+     Island, so content has to be pushed clear of it. env() is 0 where unsupported. */
+  .wrap {
+    max-width: 1180px; margin: 0 auto;
+    padding: calc(28px + env(safe-area-inset-top))
+             calc(20px + env(safe-area-inset-right))
+             80px
+             calc(20px + env(safe-area-inset-left));
+  }
+  /* Keeps the white iOS status-bar text legible in both themes, since
+     black-translucent draws it straight over the page. */
+  body::before {
+    content: ""; position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: env(safe-area-inset-top); background: #0d1311; pointer-events: none;
+  }
 
   /* Header */
   header { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px 24px; justify-content: space-between; margin-bottom: 8px; }
@@ -249,7 +263,12 @@
   .mtabs { display: none; }
 
   @media (max-width: 860px) {
-    .wrap { padding: 14px 14px 96px; }
+    .wrap {
+      padding: calc(14px + env(safe-area-inset-top))
+               calc(14px + env(safe-area-inset-right))
+               96px
+               calc(14px + env(safe-area-inset-left));
+    }
     header { gap: 10px 14px; align-items: center; }
     .brand { flex: 1 1 auto; gap: 4px; }
     h1 { font-size: 22px; }
@@ -265,7 +284,7 @@
     body.view-pick #panePick { display: block; }
     body.view-buys #paneBuys { display: block; }
 
-    .card-head { padding: 13px 14px; position: sticky; top: 0; z-index: 5;
+    .card-head { padding: 13px 14px; position: sticky; top: env(safe-area-inset-top); z-index: 5;
       background: var(--panel); border-radius: 14px 14px 0 0; }
     .card-body { padding: 14px; }
 
