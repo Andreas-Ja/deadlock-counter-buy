@@ -167,8 +167,16 @@
   .obj-t { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .obj.soon { border-color: var(--gold-dim); }
   .obj.soon .obj-t { color: var(--gold); }
+  .obj { cursor: pointer; }
+  .obj:hover { border-color: var(--muted-2); }
+  .obj:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
   .obj.imminent { border-color: var(--teal); }
   .obj.imminent .obj-t { color: var(--teal); }
+  .obj.synced .obj-name::after {
+    content: "synced"; margin-left: 7px; padding: 1px 6px; border-radius: 999px;
+    font-size: 9.5px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase;
+    color: var(--teal); border: 1px solid var(--teal); vertical-align: 1px;
+  }
   .cue-dot {
     margin-left: 6px; font-size: 10px; font-style: normal;
     color: var(--muted-2); vertical-align: 1px;
@@ -504,8 +512,10 @@
       <div class="card-body">
         <div id="objList"></div>
         <p class="src-note">
-          <b>♪</b> plays a 5-second warning — camps, bridge buffs and Sinner's Sacrifice each
-          get their own sound. Turn it on with the speaker button.<br>
+          <b>♪</b> plays a 5-second warning — camps, bridge buffs, Sinner's Sacrifice, the Urn
+          and the Rift each get their own sound. Turn it on with the speaker button.<br>
+          <b>Tap any row</b> when it actually spawns to re-sync its cycle. The Rift drifts by up
+          to a minute and camps only respawn once fully cleared, so syncing keeps them honest.<br>
           Spawn times from a community timing guide (updated Mar 2026). Camps respawn on a
           fixed global clock and only refresh if fully cleared. Re-check after each patch.
         </p>
@@ -1126,8 +1136,11 @@ const OBJECTIVES = [
   { name:"Medium camps",       sub:"T2 · 2 arrows",    first:360, repeat:420, cue:"camp"   },
   { name:"Large camps",        sub:"T3 · 3 arrows",    first:480, repeat:600, cue:"camp"   },
   { name:"Sinner's Sacrifice", sub:"punch machine",    first:480, repeat:300, cue:"sinner" },
-  { name:"Soul Urn",           sub:"",                 first:600, repeat:300, cue:null     },
-  { name:"Mid Boss",           sub:"Rejuvenator",      first:600, repeat:300, cue:null     }
+  { name:"Soul Urn",           sub:"",                 first:600, repeat:300, cue:"urn"    },
+  { name:"Mid Boss",           sub:"Rejuvenator",      first:600, repeat:300, cue:null     },
+  // Rift timing drifts by up to a minute and each one is measured from the
+  // previous actual spawn, so this is a best guess — tap the row to re-sync.
+  { name:"Unstable Rift",      sub:"±1:00 · tap to sync", first:660, repeat:420, cue:"rift", approx:true }
 ];
 const CUE_LEAD = 5;   // seconds of warning before a spawn
 
@@ -1182,7 +1195,13 @@ const CUES = {
   // Low, gritty three-pulse — the most urgent of the three.
   sinner: [{f:300, at:0,    d:0.12, type:'sawtooth', v:0.13},
            {f:300, at:0.15, d:0.12, type:'sawtooth', v:0.13},
-           {f:200, at:0.30, d:0.26, type:'sawtooth', v:0.15}]
+           {f:200, at:0.30, d:0.26, type:'sawtooth', v:0.15}],
+  // Bright ascending arpeggio — "something valuable is up".
+  urn:    [{f:880,  at:0,    d:0.09, type:'sine', v:0.20},
+           {f:1175, at:0.10, d:0.09, type:'sine', v:0.20},
+           {f:1568, at:0.20, d:0.22, type:'sine', v:0.22}],
+  // Low rising sweep — ominous, clearly unlike the others.
+  rift:   [{f:190, to:560, at:0, d:0.45, type:'triangle', v:0.22}]
 };
 function playCue(name){
   const seq=CUES[name];
@@ -1228,8 +1247,24 @@ const rows = OBJECTIVES.map(o=>{
   el.innerHTML=`<span class="obj-fill"></span>
     <span class="obj-name">${o.name}${o.cue?`<i class="cue-dot" title="Plays a ${CUE_LEAD}s warning sound">♪</i>`:''}${o.sub?`<span class="obj-sub">${o.sub}</span>`:''}</span>
     <span class="obj-t">–</span>`;
+  el.tabIndex = 0;
+  el.setAttribute('role','button');
+  el.title = 'Tap when this actually spawns to re-sync its cycle';
   objList.appendChild(el);
-  return { o, el, fill:el.querySelector('.obj-fill'), t:el.querySelector('.obj-t'), prev:null, warned:false };
+  const r = { o, el, fill:el.querySelector('.obj-fill'), t:el.querySelector('.obj-t'),
+              prev:null, warned:false, anchor:null };
+  // Re-anchor this objective's cycle to now. Needed because rift timing drifts,
+  // and camps only respawn once the camp has actually been cleared.
+  const sync = () => {
+    if(startEpoch===null) return;
+    r.anchor = elapsed();
+    resync = true;
+    el.classList.add('synced');
+    tick();
+  };
+  el.addEventListener('click', sync);
+  el.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){ e.preventDefault(); sync(); } });
+  return r;
 });
 
 function tick(){
@@ -1243,13 +1278,17 @@ function tick(){
     mbNext.textContent='Start the clock to track objective spawns.';
     timerInfo.textContent='not started';
     tabTimeN.textContent='–';
-    rows.forEach(r=>{ r.t.textContent='–'; r.fill.style.width='0%'; r.el.className='obj'; r.prev=null; r.warned=false; });
+    rows.forEach(r=>{ r.t.textContent='–'; r.fill.style.width='0%'; r.el.className='obj';
+                      r.prev=null; r.warned=false; r.anchor=null; });
     return;
   }
 
   let soonest=null;
   rows.forEach(r=>{
-    const n=nextIn(r.o,t);
+    // An anchored row counts from the spawn the user marked, not the global schedule.
+    const n = (r.anchor!==null && r.o.repeat)
+      ? r.o.repeat - ((t - r.anchor) % r.o.repeat)
+      : nextIn(r.o,t);
     if(n===null){ r.t.textContent='—'; r.fill.style.width='0%'; return; }
     // A jump upward means the window wrapped, i.e. it just spawned.
     if(r.prev!==null && n > r.prev + 1 && !resync){
@@ -1268,8 +1307,9 @@ function tick(){
       r.warned=true;
     }
 
-    r.t.textContent=fmt(n);
-    const w=windowLen(r.o,t);
+    // "~" flags a time that is only approximate until the user syncs it.
+    r.t.textContent=(r.o.approx && r.anchor===null ? '~' : '')+fmt(n);
+    const w = r.anchor!==null ? r.o.repeat : windowLen(r.o,t);
     r.fill.style.width=(w?((w-n)/w)*100:0).toFixed(1)+'%';
     r.el.classList.toggle('soon', n<=15);
     r.el.classList.toggle('imminent', n<=CUE_LEAD);
