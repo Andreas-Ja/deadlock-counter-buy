@@ -167,6 +167,13 @@
   .obj-t { font-size: 17px; font-weight: 700; font-variant-numeric: tabular-nums; }
   .obj.soon { border-color: var(--gold-dim); }
   .obj.soon .obj-t { color: var(--gold); }
+  .obj.imminent { border-color: var(--teal); }
+  .obj.imminent .obj-t { color: var(--teal); }
+  .cue-dot {
+    margin-left: 6px; font-size: 10px; font-style: normal;
+    color: var(--muted-2); vertical-align: 1px;
+  }
+  .obj.imminent .cue-dot { color: var(--teal); }
   .obj.pop { animation: objpop 1.6s ease-out; }
   @keyframes objpop {
     0%, 30% { background: var(--teal); border-color: var(--teal); }
@@ -497,6 +504,8 @@
       <div class="card-body">
         <div id="objList"></div>
         <p class="src-note">
+          <b>♪</b> plays a 5-second warning — camps, bridge buffs and Sinner's Sacrifice each
+          get their own sound. Turn it on with the speaker button.<br>
           Spawn times from a community timing guide (updated Mar 2026). Camps respawn on a
           fixed global clock and only refresh if fully cleared. Re-check after each patch.
         </p>
@@ -1111,15 +1120,16 @@ addEventListener('appinstalled',()=>{ installBtn.hidden=true; deferredPrompt=nul
    Source: community timing guide (Steam), current as of 9 Mar 2026.
    EDIT HERE after a patch — nothing else needs to change. */
 const OBJECTIVES = [
-  { name:"Small camps",        sub:"T1 · 1 arrow",     first:120, repeat:85  },
-  { name:"Boxes & statues",    sub:"breakables",       first:120, repeat:180 },
-  { name:"Bridge buffs",       sub:"rune",             first:300, repeat:300 },
-  { name:"Medium camps",       sub:"T2 · 2 arrows",    first:360, repeat:420 },
-  { name:"Large camps",        sub:"T3 · 3 arrows",    first:480, repeat:600 },
-  { name:"Sinner's Sacrifice", sub:"punch machine",    first:480, repeat:300 },
-  { name:"Soul Urn",           sub:"",                 first:600, repeat:300 },
-  { name:"Mid Boss",           sub:"Rejuvenator",      first:600, repeat:300 }
+  { name:"Small camps",        sub:"T1 · 1 arrow",     first:120, repeat:85,  cue:"camp"   },
+  { name:"Boxes & statues",    sub:"breakables",       first:120, repeat:180, cue:null     },
+  { name:"Bridge buffs",       sub:"rune",             first:300, repeat:300, cue:"buff"   },
+  { name:"Medium camps",       sub:"T2 · 2 arrows",    first:360, repeat:420, cue:"camp"   },
+  { name:"Large camps",        sub:"T3 · 3 arrows",    first:480, repeat:600, cue:"camp"   },
+  { name:"Sinner's Sacrifice", sub:"punch machine",    first:480, repeat:300, cue:"sinner" },
+  { name:"Soul Urn",           sub:"",                 first:600, repeat:300, cue:null     },
+  { name:"Mid Boss",           sub:"Rejuvenator",      first:600, repeat:300, cue:null     }
 ];
+const CUE_LEAD = 5;   // seconds of warning before a spawn
 
 let startEpoch=null, pausedAt=null, soundOn=false, wakeLock=null;
 // Set when the clock is moved by hand, so the next tick re-syncs without
@@ -1152,21 +1162,45 @@ function nextIn(o,t){
 }
 const windowLen = (o,t) => t < o.first ? o.first : o.repeat;
 
-/* Short beep via WebAudio — no asset needed. Unlocked by the Start tap. */
+/* Cues are synthesised with WebAudio, so there are no audio files to load.
+   Each is a short note sequence: at = start offset, d = duration, f = Hz
+   (to = glide target), v = peak gain. Browsers only allow audio after a
+   user gesture, so the context is unlocked on the first Start/toggle tap. */
 let actx=null;
-function beep(){
-  if(!soundOn) return;
+function unlockAudio(){
   try{
     actx = actx || new (window.AudioContext||window.webkitAudioContext)();
     if(actx.state==='suspended') actx.resume();
-    const osc=actx.createOscillator(), gain=actx.createGain();
-    osc.frequency.value=880; osc.type='sine';
-    osc.connect(gain); gain.connect(actx.destination);
+  }catch(e){}
+}
+const CUES = {
+  // Fires most often (T1 every 1:25), so it stays quiet and short.
+  camp:   [{f:760, at:0,    d:0.09, type:'sine',     v:0.16}],
+  // Bright rising two-tone — reads as "go grab it".
+  buff:   [{f:660, at:0,    d:0.10, type:'triangle', v:0.24},
+           {f:990, at:0.11, d:0.17, type:'triangle', v:0.24}],
+  // Low, gritty three-pulse — the most urgent of the three.
+  sinner: [{f:300, at:0,    d:0.12, type:'sawtooth', v:0.13},
+           {f:300, at:0.15, d:0.12, type:'sawtooth', v:0.13},
+           {f:200, at:0.30, d:0.26, type:'sawtooth', v:0.15}]
+};
+function playCue(name){
+  const seq=CUES[name];
+  if(!soundOn || !seq) return;
+  try{
+    unlockAudio();
     const t0=actx.currentTime;
-    gain.gain.setValueAtTime(0.0001,t0);
-    gain.gain.exponentialRampToValueAtTime(0.3,t0+0.01);
-    gain.gain.exponentialRampToValueAtTime(0.0001,t0+0.4);
-    osc.start(t0); osc.stop(t0+0.42);
+    seq.forEach(n=>{
+      const osc=actx.createOscillator(), g=actx.createGain();
+      osc.type=n.type||'sine';
+      osc.frequency.setValueAtTime(n.f, t0+n.at);
+      if(n.to) osc.frequency.exponentialRampToValueAtTime(n.to, t0+n.at+n.d);
+      osc.connect(g); g.connect(actx.destination);
+      g.gain.setValueAtTime(0.0001, t0+n.at);
+      g.gain.exponentialRampToValueAtTime(n.v??0.2, t0+n.at+0.012);
+      g.gain.exponentialRampToValueAtTime(0.0001, t0+n.at+n.d);
+      osc.start(t0+n.at); osc.stop(t0+n.at+n.d+0.03);
+    });
   }catch(e){}
 }
 
@@ -1192,10 +1226,10 @@ const rows = OBJECTIVES.map(o=>{
   const el=document.createElement('div');
   el.className='obj';
   el.innerHTML=`<span class="obj-fill"></span>
-    <span class="obj-name">${o.name}${o.sub?`<span class="obj-sub">${o.sub}</span>`:''}</span>
+    <span class="obj-name">${o.name}${o.cue?`<i class="cue-dot" title="Plays a ${CUE_LEAD}s warning sound">♪</i>`:''}${o.sub?`<span class="obj-sub">${o.sub}</span>`:''}</span>
     <span class="obj-t">–</span>`;
   objList.appendChild(el);
-  return { o, el, fill:el.querySelector('.obj-fill'), t:el.querySelector('.obj-t'), prev:null };
+  return { o, el, fill:el.querySelector('.obj-fill'), t:el.querySelector('.obj-t'), prev:null, warned:false };
 });
 
 function tick(){
@@ -1209,7 +1243,7 @@ function tick(){
     mbNext.textContent='Start the clock to track objective spawns.';
     timerInfo.textContent='not started';
     tabTimeN.textContent='–';
-    rows.forEach(r=>{ r.t.textContent='–'; r.fill.style.width='0%'; r.el.className='obj'; r.prev=null; });
+    rows.forEach(r=>{ r.t.textContent='–'; r.fill.style.width='0%'; r.el.className='obj'; r.prev=null; r.warned=false; });
     return;
   }
 
@@ -1220,13 +1254,25 @@ function tick(){
     // A jump upward means the window wrapped, i.e. it just spawned.
     if(r.prev!==null && n > r.prev + 1 && !resync){
       r.el.classList.remove('pop'); void r.el.offsetWidth; r.el.classList.add('pop');
-      beep();
     }
     r.prev=n;
+
+    // Warning cue, once per cycle. After a manual clock nudge we only re-arm,
+    // so shifting the clock never fires a burst of sounds.
+    if(resync){
+      r.warned = n<=CUE_LEAD;
+    }else if(n>CUE_LEAD){
+      r.warned=false;
+    }else if(!r.warned){
+      playCue(r.o.cue);
+      r.warned=true;
+    }
+
     r.t.textContent=fmt(n);
     const w=windowLen(r.o,t);
     r.fill.style.width=(w?((w-n)/w)*100:0).toFixed(1)+'%';
     r.el.classList.toggle('soon', n<=15);
+    r.el.classList.toggle('imminent', n<=CUE_LEAD);
     if(!soonest || n<soonest.n) soonest={n,name:r.o.name};
   });
 
@@ -1241,7 +1287,7 @@ function tick(){
 }
 
 mbGo.addEventListener('click',()=>{
-  if(startEpoch===null){ startEpoch=Date.now(); pausedAt=null; beep(); }
+  if(startEpoch===null){ startEpoch=Date.now(); pausedAt=null; unlockAudio(); }
   else if(pausedAt!==null){ startEpoch += Date.now()-pausedAt; pausedAt=null; }
   else { pausedAt=Date.now(); }
   setWakeLock(isRunning());
@@ -1259,7 +1305,7 @@ mbSound.addEventListener('click',()=>{
   mbSound.setAttribute('aria-pressed',soundOn?'true':'false');
   mbSound.textContent = soundOn ? '🔊' : '🔈';
   try{ localStorage.setItem(SND_KEY, soundOn?'1':'0'); }catch(e){}
-  if(soundOn) beep();
+  if(soundOn){ unlockAudio(); playCue('buff'); }   // preview so it's audible on toggle
 });
 
 loadClock();
